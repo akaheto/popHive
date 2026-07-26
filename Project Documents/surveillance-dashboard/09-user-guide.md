@@ -21,18 +21,19 @@ sourced from PopHIVE (plus NYC's own open data for borough-level precision).
 ## Prerequisites
 
 - A web browser.
-- The dashboard's hosted URL (recorded here once deployed in M7 — not yet deployed as
-  of this writing; currently runs locally via `npm run dev` in `web/`).
+- The dashboard's hosted URL: **https://web-six-sage-30.vercel.app** (unlisted, not
+  linked publicly anywhere — no login required, per the personal-use scope).
 
 ## Installation or access
 
-1. Local development: from the `web/` folder, run `npm install` once, then `npm run dev`
+1. Hosted (recommended): open https://web-six-sage-30.vercel.app directly. The site
+   rebuilds automatically once a day (12:00 UTC) via Vercel Cron, re-running the full
+   data pipeline so it stays current without any manual step.
+2. Local development: from the `web/` folder, run `npm install` once, then `npm run dev`
    and open the printed `localhost` URL. The data pipeline runs automatically before
    each build (`npm run build`) via the `prebuild` script; for local dev, run
    `npm run build:data` manually first (or after pulling new code) to refresh the
    generated JSON in `web/data/generated/`.
-2. Hosted access: to be added once M7 (Vercel deployment + scheduled rebuild) is
-   complete.
 
 ## Configuration
 
@@ -177,6 +178,7 @@ Do not include real secrets or credentials.
 |---|---|---|
 | 2026-07-25 | Pre-M1 | Documentation scaffolded; no user-facing product yet |
 | 2026-07-26 | M1-M6 | First full build: national map, overview strip, tri-state/NYC pinned view with real per-borough data, MMR vaccination-coverage layer, and a separate chronic-disease tab. Browser-verified. |
+| 2026-07-26 | M7 | Deployed to Vercel at https://web-six-sage-30.vercel.app, connected to a private GitHub repo, with a daily scheduled rebuild via Vercel Cron. |
 
 ## Documentation QA
 

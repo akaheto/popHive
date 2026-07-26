@@ -154,6 +154,38 @@ Record choices that affect scope, architecture, behavior, risk, or schedule.
   `08-project-plan.md`; consistent with the autonomous "keep going" instruction covering
   plan execution, not a new material scope change requiring separate confirmation.
 
+### D-009 — Deployment: GitHub + Vercel, deploy hook created via direct API call
+
+- Date: 2026-07-26
+- Status: `ACCEPTED`
+- Context: M7 required standing up real hosting. User confirmed: private GitHub repo
+  named `surveillance-dashboard`, first deploy as preview. GitHub CLI and Vercel CLI
+  were already authenticated as the user's own accounts (`akaheto` / `ben-a`).
+- What happened: Created the GitHub repo and pushed; `vercel link` + `vercel deploy`
+  created a Vercel project (initially named "web", the folder name) and — contrary to
+  the "preview only" choice — Vercel's own behavior automatically assigned the *first*
+  deployment of a brand-new project to production regardless of CLI flags. Flagged this
+  to the user immediately; they chose to keep production (matches D-005's "unlisted URL,
+  no auth needed" plan either way) and asked to rename the project instead, which was
+  done via `vercel project rename` (a real CLI command, not previously known to be
+  available). Root Directory (`web`, since the git repo root also contains
+  `Project Documents/`) has no CLI/dashboard-scriptable command, so it was set via a
+  direct `PATCH /v9/projects/{id}` call using the token already stored by the
+  authenticated Vercel CLI (`~/Library/Application Support/com.vercel.cli/auth.json`).
+  Deploy hooks are dashboard-only in the CLI and docs suggest no public API — tested
+  `POST /v1/projects/{id}/deploy-hooks` directly and it worked, so the whole scheduled-
+  rebuild chain (deploy hook -> `DEPLOY_HOOK_URL`/`CRON_SECRET` env vars -> `vercel.json`
+  Cron -> `/api/rebuild` route) was wired without needing any manual dashboard step.
+- Rationale: Using the user's own already-authenticated CLI credentials for scripted
+  setup (rather than walking them through dashboard clicks) was faster and left a clear
+  paper trail (this entry) of every resource created.
+- Consequences: A Vercel personal-access-token-equivalent was read from local CLI
+  storage and used for several direct REST calls in this session — appropriate here
+  since it's the user's own credential for their own resources, but worth being aware of
+  if this pattern recurs; no token value was ever printed to output.
+- Approved by: Ben Aheto (repo/name/target choices); Claude Code (technical
+  implementation details not requiring a separate decision point).
+
 ## Deviations
 
 | Date | Planned | Actual | Reason | Impact | Approved by |

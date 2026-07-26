@@ -80,16 +80,28 @@ flowchart TD
     D1 --> D2
 ```
 
-### Deployment / refresh loop (target, M7 — not yet built)
+### Deployment / refresh loop (as built, M7)
 
 ```mermaid
 flowchart LR
-    Cron["Vercel Cron\n(scheduled trigger)"] -->|"invokes"| Hook["Deploy hook"]
+    Cron["Vercel Cron\n(0 12 * * * = daily, 12:00 UTC)"] -->|"GET /api/rebuild\n(Bearer CRON_SECRET)"| Route["app/api/rebuild/route.ts"]
+    Route -->|"POST"| Hook["Deploy hook\n(DEPLOY_HOOK_URL env var)"]
     Hook -->|"triggers"| Build["Vercel build\n(runs prebuild -> build:data -> next build)"]
-    Build --> Deploy["New static deployment"]
+    Build --> Deploy["New production deployment"]
     Deploy -->|"serves"| Browser["User's browser"]
     Deploy -.->|"rollback if needed"| Prior["Previous deployment\n(Vercel deployment history)"]
 ```
+
+Live at **https://web-six-sage-30.vercel.app** (Vercel project `surveillance-dashboard`,
+scope `ben-a`; GitHub repo `akaheto/surveillance-dashboard`, private; Root Directory
+`web`). The deploy hook was created via the Vercel REST API (`POST /v1/projects/{id}
+/deploy-hooks`) since the CLI has no command for it and the dashboard UI wasn't scripted
+against; `DEPLOY_HOOK_URL` and `CRON_SECRET` are stored as encrypted production
+environment variables, not committed to the repo. Verified 2026-07-26: build succeeds
+on Vercel's build image (confirms DuckDB's native binary works there, resolving R-002),
+the deployed site serves correctly, the cron definition is registered against the
+latest deployment, and `/api/rebuild` correctly returns 401 without the correct bearer
+token.
 
 ### NYC borough blend (D-008)
 
@@ -211,8 +223,9 @@ No PII/PHI: PopHIVE data is public, aggregate, and de-identified per its own gov
 
 | Variable or setting | Purpose | Required? | Default | Secret? |
 |---|---|---:|---|---:|
-| Vercel deploy hook URL | Cron target to trigger rebuild | Yes | — | Yes (store as a Vercel env var, not in this doc) |
-| Cron schedule | How often to rebuild | Yes | Daily (per A-003) | No |
+| `DEPLOY_HOOK_URL` | Deploy hook the `/api/rebuild` route POSTs to | Yes | — | Yes — set as an encrypted Vercel production env var, not recorded here |
+| `CRON_SECRET` | Bearer token `/api/rebuild` checks against, so only Vercel's own Cron invocations succeed | Yes | — | Yes — set as an encrypted Vercel production env var, not recorded here |
+| Cron schedule | How often to rebuild | Yes | Daily, `0 12 * * *` (per A-003), in `web/vercel.json` | No |
 
 Never record actual secret values.
 
@@ -260,10 +273,12 @@ Never record actual secret values.
   confirmed for flu/RSV/COVID national status and HealthMap MMR coverage); full
   interactive browser verification completed 2026-07-26 (Chrome, desktop + 420px
   viewport) — see `08-project-plan.md` milestone completion notes for what was checked.
-- Deployment: Not yet done (M7) — target is Vercel, connected to this git repo, with a
-  scheduled rebuild via Vercel Cron + deploy hook. Requires confirming the user's
-  Vercel/GitHub account setup before creating any hosted/shared resources.
-- Rollback: Once deployed, Vercel's deployment history allows instant rollback to any
+- Deployment: Live on Vercel (project `surveillance-dashboard`, scope `ben-a`) at
+  https://web-six-sage-30.vercel.app, connected to the private GitHub repo
+  `akaheto/surveillance-dashboard` (Root Directory `web`) — every push to `main` builds
+  and deploys automatically. A daily Vercel Cron job (`web/vercel.json`) also triggers a
+  rebuild independent of pushes, so the site refreshes even with no code changes.
+- Rollback: Vercel's deployment history allows instant rollback to any
   prior build. Locally, git history serves the same purpose.
 
 ## Performance, reliability, and accessibility
@@ -285,7 +300,7 @@ Never record actual secret values.
 |---|---|---|---|
 | NYC boroughs may share one HSA-level NSSP value in the *national* map's county drill-down | Implies less precision than a true per-borough figure — but only in the national drill-down; the dedicated "Tri-State + NYC" view uses real DOHMH per-borough data | Explicit UI disclosure in the national drill-down; use "Tri-State + NYC" for real borough precision (D-008, resolved in M4) | R-001 (residual, scoped down), M4 |
 | Static rebuild lags real-time by up to one cycle | Data can be briefly stale relative to a fresh PopHIVE pull | `as_of` date shown per panel | A-003 |
-| DuckDB adds a native binary to the Vercel build | Slightly larger/slower build than a pure-JS reader | Expected to work on Vercel's standard Linux build image; revisit if build issues appear | D-007, R-002 |
+| DuckDB adds a native binary to the Vercel build | Slightly larger/slower build than a pure-JS reader | Confirmed working (2026-07-26): the Vercel build succeeded end-to-end on the first deploy — R-002 resolved, no revisit needed | D-007, R-002 resolved |
 | `fips` column in NSSP-sourced bundles (flu/covid/rsv ED visits) is a `DOUBLE`, not a zero-padded string (e.g. `1007`, not `"01007"`) | Must reformat before matching TopoJSON county/state IDs, which expect zero-padded FIPS strings | Pipeline pads: 5 digits for county, 2 digits for state, before any geography join | M1 evidence, plan step 2 |
 | `is_state_estimate` is a `DOUBLE` (0/1), not a boolean, across all bundles checked so far | Must compare `= 1` rather than truthy-check | Encode explicitly in the pipeline's filter logic | M1 evidence |
 | The `flu`/`covid`/`rsv` ED-visit bundles have no `suppressed`/`suppressed_flag` column — only `is_state_estimate` | The brief's suppression rule doesn't apply uniformly to every bundle; must check per-file, not assume the column exists | Pipeline checks for the column's existence before applying suppression filtering | M1 evidence |
@@ -345,3 +360,4 @@ and chronic-disease file schemas are not yet inspected — planned before M5/M6.
 | 2026-07-26 | M6 | `lib/pophive/chronic.ts` built (diabetes/obesity/opioid-overdose); separate Chronic Disease tab | — |
 | 2026-07-26 | Post-M6 | Full interactive browser verification across M2-M6; two JSX whitespace bugs found and fixed | — |
 | 2026-07-26 | Post-M6 | This document and `09-user-guide.md` updated from "target/TBD" to as-built content; architecture diagrams added | — |
+| 2026-07-26 | M7 | Deployed to Vercel, connected to a new private GitHub repo; daily Cron + deploy hook wired for scheduled rebuild; DuckDB-on-Vercel risk (R-002) resolved | — |

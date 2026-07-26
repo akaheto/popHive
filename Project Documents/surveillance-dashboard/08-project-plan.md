@@ -59,7 +59,7 @@ A backlog item is ready when:
 | M4 | Tri-state/NYC pinned view | County drill-down for NY/NJ/CT + NYC boroughs, per M3 outcome | Claude Code | No deadline | `COMPLETE` | 2026-07-26 | 2026-07-26 |
 | M5 | Vaccination-coverage layer | MMR (+ other childhood vaccines) paired with measles map | Claude Code | No deadline | `COMPLETE` | 2026-07-26 | 2026-07-26 |
 | M6 | Chronic-disease/behavioral-health tab | Separate slower-cadence tab | Claude Code | No deadline | `COMPLETE` | 2026-07-26 | 2026-07-26 |
-| M7 | Scheduled rebuild + visual/accessibility pass | Vercel Cron wired, style guide applied consistently | Claude Code | No deadline | `NOT STARTED` | | |
+| M7 | Scheduled rebuild + visual/accessibility pass | Vercel Cron wired, style guide applied consistently | Claude Code | No deadline | `IN PROGRESS` | 2026-07-26 | |
 | M8 | Test, QA, and close-out | All ACs verified, QA passed, retro complete | Claude Code | No deadline | `NOT STARTED` | | |
 
 ## Milestone details
@@ -211,7 +211,23 @@ A backlog item is ready when:
 - Owner: Claude Code
 - Dependencies: M2–M6.
 - Acceptance criteria: AC-9; visual style guide checklist passed.
-- Status: `NOT STARTED`
+- Status: `IN PROGRESS`
+- Completion note (deployment half — AC-9 satisfied): Created a private GitHub repo
+  (`akaheto/surveillance-dashboard`), a Vercel project (`surveillance-dashboard`, scope
+  `ben-a`) with Root Directory `web`, connected them for auto-deploy on push. Added
+  `/api/rebuild` (bearer-token-gated) and `web/vercel.json`'s daily Cron
+  (`0 12 * * *`) which POSTs to a Vercel deploy hook to trigger a full rebuild — no live
+  backend, matching D-001/A-003. Deploy hook created via direct Vercel REST API calls
+  (no CLI/dashboard scripting available for that specific action);
+  `DEPLOY_HOOK_URL`/`CRON_SECRET` stored as encrypted Vercel env vars. Verified: build
+  succeeds on Vercel (resolves R-002, the DuckDB-on-Vercel risk), site serves correctly
+  at https://web-six-sage-30.vercel.app, cron registered against the latest deployment,
+  `/api/rebuild` returns 401 without the correct token.
+- Remaining (visual/accessibility half — not yet done): a dedicated pass against the
+  `12-visual-style-guide.md` checklist (contrast, focus visibility, text scaling,
+  representative screen states) across all surfaces built in M2-M6.
+- Evidence: `web/vercel.json`, `web/app/api/rebuild/route.ts`; Vercel deployment
+  `dpl_33NP1q1CjvA5U63PKBmZPg8unzfd`; live site.
 
 ### M8 — Test, QA, and close-out
 
