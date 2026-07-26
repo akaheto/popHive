@@ -104,8 +104,7 @@ function MeaslesCard({ card }: { card: MeaslesOverviewCard }) {
         {card.activeStateCount} states with active weekly case reports
       </p>
       <p className="mt-2 text-xs" style={{ color: "var(--color-text-muted)" }}>
-        JHU measles tracker &middot; as of {card.asOf} &middot; PopHIVE does not classify
-        measles outbreak severity, so no level is shown
+        {`JHU measles tracker · as of ${card.asOf} · PopHIVE does not classify measles outbreak severity, so no level is shown`}
       </p>
     </Card>
   );

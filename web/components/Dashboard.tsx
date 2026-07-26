@@ -255,8 +255,7 @@ export function Dashboard({
       {triStateView ? (
         <div>
           <h3 className="mb-2 text-sm font-medium" style={{ color: "var(--color-text-primary)" }}>
-            NY / NJ / CT counties &middot; {DISEASE_LABEL[disease]} ED visits % &middot; NYC
-            boroughs outlined
+            {`NY / NJ / CT counties · ${DISEASE_LABEL[disease]} ED visits % · NYC boroughs outlined`}
           </h3>
           <p className="mb-2 text-xs" style={{ color: "var(--color-text-secondary)" }}>
             NYC borough values come from NYC DOHMH&apos;s own open data (true
