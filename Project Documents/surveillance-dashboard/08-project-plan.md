@@ -54,11 +54,11 @@ A backlog item is ready when:
 | ID | Milestone | Goal | Owner | Target | Status | Started | Completed |
 |---|---|---|---|---|---|---|---|
 | M1 | Scaffold + data pipeline foundation | Working Next.js/Vercel scaffold, validated parquet→JSON pipeline for one bundle | Claude Code | No deadline | `COMPLETE` | 2026-07-25 | 2026-07-25 |
-| M2 | National map + overview strip | Choropleth (state+county) for 4 diseases, disease/signal selectors, overview strip | Claude Code | No deadline | `IN PROGRESS` | 2026-07-25 | |
+| M2 | National map + overview strip | Choropleth (state+county) for 4 diseases, disease/signal selectors, overview strip | Claude Code | No deadline | `COMPLETE` | 2026-07-25 | 2026-07-26 |
 | M3 | NYC DOHMH research spike | Recorded decision: blend borough data or keep HSA-level | Claude Code | No deadline | `COMPLETE` | 2026-07-26 | 2026-07-26 |
-| M4 | Tri-state/NYC pinned view | County drill-down for NY/NJ/CT + NYC boroughs, per M3 outcome | Claude Code | No deadline | `IN PROGRESS` | 2026-07-26 | |
-| M5 | Vaccination-coverage layer | MMR (+ other childhood vaccines) paired with measles map | Claude Code | No deadline | `IN PROGRESS` | 2026-07-26 | |
-| M6 | Chronic-disease/behavioral-health tab | Separate slower-cadence tab | Claude Code | No deadline | `IN PROGRESS` | 2026-07-26 | |
+| M4 | Tri-state/NYC pinned view | County drill-down for NY/NJ/CT + NYC boroughs, per M3 outcome | Claude Code | No deadline | `COMPLETE` | 2026-07-26 | 2026-07-26 |
+| M5 | Vaccination-coverage layer | MMR (+ other childhood vaccines) paired with measles map | Claude Code | No deadline | `COMPLETE` | 2026-07-26 | 2026-07-26 |
+| M6 | Chronic-disease/behavioral-health tab | Separate slower-cadence tab | Claude Code | No deadline | `COMPLETE` | 2026-07-26 | 2026-07-26 |
 | M7 | Scheduled rebuild + visual/accessibility pass | Vercel Cron wired, style guide applied consistently | Claude Code | No deadline | `NOT STARTED` | | |
 | M8 | Test, QA, and close-out | All ACs verified, QA passed, retro complete | Claude Code | No deadline | `NOT STARTED` | | |
 
@@ -104,20 +104,20 @@ A backlog item is ready when:
   overview strip; data-quality rules applied in the pipeline.
 - Acceptance criteria: AC-1, AC-2, AC-3, AC-7, AC-8 (respiratory/measles bundles only).
 - Definition of done: as above.
-- Status: `IN PROGRESS`
+- Status: `COMPLETE`
 - Start note: Started 2026-07-25, directly following M1.
 - Completion note: Build complete — data pipeline (overview cards, 3-signal state
   series, county ED-visit series with disclosed state-estimate fallback), Choropleth
   and OverviewStrip components, disease/signal selectors, drill-down navigation, all
-  wired into `app/page.tsx`. Typecheck/lint clean; dev server confirmed serving correct
-  content via server logs + rendered HTML inspection (52 SVG paths = 50 states + DC +
-  nation outline; card values match the pipeline's own verified output). Full
-  interactive/visual browser verification (colors, hover, click interaction, responsive
-  behavior, accessibility) intentionally deferred at the user's request — milestone
-  stays `IN PROGRESS` until that's done, per the "never claim completion while required
-  checks remain unrun" rule.
+  wired into `app/page.tsx`. Typecheck/lint clean. Full interactive browser verification
+  completed 2026-07-26: national map renders and colors correctly, hover tooltips show
+  correct name/value/date, click-to-drill-down and back navigation both work, narrow
+  (420px) viewport holds up with no horizontal overflow. Found and fixed two real bugs
+  during this pass (JSX whitespace collapsing ate a space in two places — see
+  `03-decisions.md`/git history); no other functional issues found. Console showed only
+  an unrelated Chrome-extension messaging artifact, not an app error.
 - Evidence: `web/app`, `web/components`, `web/lib/pophive`; `/tmp/nextdev.log` server
-  output; rendered HTML spot-check (2026-07-26).
+  output; browser screenshots 2026-07-26.
 
 ### M3 — NYC DOHMH research spike
 
@@ -144,15 +144,17 @@ A backlog item is ready when:
 - Dependencies: M2, M3.
 - Planned deliverables: Tri-state/NYC panel, HSA-disclosure logic (or DOHMH blend per M3).
 - Acceptance criteria: AC-4.
-- Status: `IN PROGRESS`
 - Completion note: Built — `lib/nycDohmh.ts` fetches real per-borough ED-visit data
   (D-008) and merges it into the county pipeline with source tagging; a pinned
   "Tri-State + NYC" button jumps directly to a combined NY/NJ/CT county view with the 5
   NYC boroughs visually outlined and a disclosure note explaining the DOHMH-vs-NSSP
-  distinction. Typecheck/lint clean; server-rendered HTML confirmed the button renders.
-  Interactive/visual browser verification still pending (same deferred item as M2).
+  distinction. Typecheck/lint clean. Interactive browser verification (2026-07-26):
+  Tri-State + NYC button navigates correctly, boroughs render with the focus-color
+  outline, disclosure text displays correctly.
+- Status: `COMPLETE`
 - Evidence: `web/lib/nycDohmh.ts`, `web/components/{Dashboard,Choropleth}.tsx`; pipeline
-  console output showing 5 NYC DOHMH-sourced counties per disease.
+  console output showing 5 NYC DOHMH-sourced counties per disease; browser screenshots
+  2026-07-26.
 
 ### M5 — Vaccination-coverage layer
 
@@ -160,7 +162,6 @@ A backlog item is ready when:
 - Owner: Claude Code
 - Dependencies: M2 (measles map).
 - Acceptance criteria: AC-5.
-- Status: `IN PROGRESS`
 - Completion note: Built two independent MMR coverage series —
   `mmr_coverage_healthmap` (verified exact match to the brief's reference figures: US
   69.0%, MA 79.4%, ME 77.8%, VT 76.9%, CT 76.5%, MN 75.7%, as of 2024-12-31) and CDC
@@ -172,10 +173,12 @@ A backlog item is ready when:
   possibly-mislabeled county metric; tracked as a future enhancement pending
   clarification. Panel appears directly under the measles map (per the brief's "paired
   visually" request) with the as-of dates prominently flagged as much older than the
-  case map. Typecheck/lint clean; dev server confirmed serving without errors.
-  Interactive/visual browser verification still pending (same deferred item as M2/M4).
+  case map. Typecheck/lint clean. Interactive browser verification (2026-07-26): both
+  HealthMap and CDC NIS toggle correctly, map recolors, as-of disclosure text updates
+  per source.
+- Status: `COMPLETE`
 - Evidence: `web/lib/pophive/vaccination.ts`, `web/components/Dashboard.tsx`; pipeline
-  console output.
+  console output; browser screenshots 2026-07-26.
 
 ### M6 — Chronic-disease/behavioral-health tab
 
@@ -183,7 +186,6 @@ A backlog item is ready when:
 - Owner: Claude Code
 - Dependencies: M1 (pipeline supports claims-based bundles).
 - Acceptance criteria: AC-6.
-- Status: `IN PROGRESS`
 - Completion note: Built a representative slice — diabetes (Epic Cosmos ICD10),
   obesity (Epic Cosmos BMI), and opioid overdose death rate (CDC/NCHS) — as a fully
   separate "Chronic Disease & Behavioral Health" tab with its own indicator selector,
@@ -196,11 +198,12 @@ A backlog item is ready when:
   screenings, cardiovascular/depression/diabetes screening, wellness visits, adult
   vaccination, anxiety, depression, adhd, opioid use disorder, injury/firearm deaths)
   is NOT fully covered — deliberately scoped down to 3 indicators for v1, rest tracked
-  in `11-future-enhancements.md`. Typecheck/lint clean; dev server verified.
-  Interactive/visual browser verification still pending (same deferred item as
-  M2/M4/M5).
+  in `11-future-enhancements.md`. Typecheck/lint clean. Interactive browser verification
+  (2026-07-26): tab switches correctly to a fully separate surface, all 3 indicator
+  buttons work, map recolors and source/as-of caption updates per indicator.
+- Status: `COMPLETE`
 - Evidence: `web/lib/pophive/chronic.ts`, `web/components/ChronicDiseasePanel.tsx`;
-  pipeline console output.
+  pipeline console output; browser screenshots 2026-07-26.
 
 ### M7 — Scheduled rebuild + visual/accessibility pass
 
