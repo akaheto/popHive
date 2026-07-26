@@ -78,15 +78,28 @@ severity levels used in the overview strip and level-based map fills:
 
 Sequential ramp (single hue, blue, light→dark step 100→700) for choropleth magnitude
 encoding — the map's fill color is never the status palette, since the map encodes a
-continuous value, not a discrete level:
+continuous value, not a discrete level. The ramp is theme-aware as of M7: `Choropleth.tsx`
+picks light or dark endpoints from a `prefers-color-scheme` media-query hook.
+
+Light mode (unchanged from M2, low value fades toward the light page background):
 
 `#cde2fb → #b7d3f6 → #9ec5f4 → #86b6ef → #6da7ec → #5598e7 → #3987e5 → #2a78d6 → #256abf
 → #1c5cab → #184f95 → #104281 → #0d366b`
 
-Known limitation: the sequential ramp's dark-mode contrast has not been independently
-re-validated against the dark chart surface (only the categorical/status palettes were
-confirmed for both modes) — tracked as a follow-up, low risk since the map is a
-secondary surface, not the primary reading mode for most sessions.
+Dark mode (added M7, low value fades toward the near-black dark surface instead of going
+transparent/invisible — a straight reuse of the light hexes made the darkest, highest-
+value steps nearly indistinguishable from the surface):
+
+`#182a3d → #1a3350 → #1d3d62 → #204775 → #255588 → #2c649c → #3373b0 → #3987e5 → #5598e7
+→ #6da7ec → #86b6ef → #9ec5f4 → #b7d3f6`
+
+Endpoint contrast against `--color-bg-page` checked programmatically (WCAG relative-
+luminance formula) in both modes: low value ≈1.0-1.3:1 (intentionally low — it's meant to
+recede, paired with the separate `color-no-data` fill for true no-data cells), high value
+≈11.3:1 (light) / ≈12.6:1 (dark) — clearly legible in both themes, same contrast contract
+preserved across the theme switch. Not yet confirmed by an actual rendered dark-mode
+screenshot in this environment (tooling limitation, not a design gap) — a quick manual
+look under system dark mode is recommended before final visual sign-off.
 
 ### Typography
 
@@ -173,7 +186,9 @@ accessibility requirements. To be completed progressively as each component is b
 - Reduced-motion behavior: Respect `prefers-reduced-motion` — disable non-essential
   transitions.
 - Drag, swipe, hover, and keyboard equivalents: Map drill-down (click) must have a
-  keyboard-accessible equivalent (e.g. focusable state list) — finalize in M2.
+  keyboard-accessible equivalent. Delivered in M7: a labeled "Jump to state" `<select>`
+  above the map, shown wherever click-to-drill-down exists, calling the same handler as
+  a map click.
 
 ## Content and data display
 

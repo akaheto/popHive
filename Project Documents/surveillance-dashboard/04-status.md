@@ -16,9 +16,18 @@
   user guide and technical spec delivered and since refreshed to reflect the live
   deployment.
 - In progress: M7's remaining half (a dedicated visual/accessibility pass against
-  `12-visual-style-guide.md` across all surfaces).
-- Next: M7's visual/accessibility pass, then M8 (formal AC verification in
-  `05-tests.md`/`06-qa.md`, retrospective in `07-retro.md`).
+  `12-visual-style-guide.md` across all surfaces). Two items from that pass delivered
+  2026-07-26: E-008 (theme-aware dark-mode choropleth ramp, replacing the reused
+  light-mode hexes) and E-010 (keyboard-accessible "Jump to state" equivalent for map
+  drill-down). Browser-verified in light mode (dashboard, tri-state/NYC panel, chronic-
+  disease tab, keyboard state-jump flow); dark-mode ramp verified by contrast-ratio
+  calculation against `globals.css` tokens rather than a rendered screenshot — this
+  session's browser tooling couldn't force `prefers-color-scheme: dark` without
+  changing the machine's system Appearance setting, which was correctly out of scope.
+  A quick manual look under system dark mode is recommended before closing out M7.
+- Next: remainder of M7's visual/accessibility pass (broader checklist in
+  `12-visual-style-guide.md` — Design QA checklist — beyond E-008/E-010), then M8
+  (formal AC verification in `05-tests.md`/`06-qa.md`, retrospective in `07-retro.md`).
 
 ## Current milestone
 

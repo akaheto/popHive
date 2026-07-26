@@ -291,8 +291,8 @@ Never record actual secret values.
 - Availability or recovery expectations: Personal project — best-effort; Vercel's
   platform reliability is sufficient once deployed.
 - Accessibility requirements: Standard practice per the visual style guide (contrast,
-  keyboard nav, focus visibility) — see `12-visual-style-guide.md`. Known gap: map
-  state-click drill-down has no keyboard equivalent yet (E-010).
+  keyboard nav, focus visibility) — see `12-visual-style-guide.md`. Map state-click
+  drill-down has a keyboard equivalent as of M7 (E-010): a "Jump to state" `<select>`.
 
 ## Technical limitations and debt
 
