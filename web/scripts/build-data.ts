@@ -14,6 +14,7 @@ import {
   buildMeaslesCumulativeSeries,
 } from "../lib/pophive/measles";
 import { buildCountySeries } from "../lib/pophive/countyEdVisits";
+import { buildMmrHealthmapSeries, buildMmrNisSeries } from "../lib/pophive/vaccination";
 import { fetchAllBoroughData, type RespiratoryDisease as NycDisease } from "../lib/nycDohmh";
 
 const OUT_DIR = path.join(__dirname, "..", "data", "generated");
@@ -117,6 +118,21 @@ async function main() {
     );
   }
   await writeFile(path.join(OUT_DIR, "counties.json"), JSON.stringify(counties, null, 2));
+
+  console.log("\nBuilding vaccination-coverage series (MMR)...");
+  const [mmrHealthmap, mmrNis] = await Promise.all([
+    buildMmrHealthmapSeries(),
+    buildMmrNisSeries(),
+  ]);
+  const vaccination = { mmrHealthmap, mmrNis };
+  console.log(
+    `  MMR (HealthMap): ${mmrHealthmap.states.length} states, as of ${mmrHealthmap.asOf}`
+  );
+  console.log(`  MMR (NIS): ${mmrNis.states.length} states, as of ${mmrNis.asOf}`);
+  await writeFile(
+    path.join(OUT_DIR, "vaccination.json"),
+    JSON.stringify(vaccination, null, 2)
+  );
 
   console.log(`\nDone in ${((Date.now() - startedAt) / 1000).toFixed(1)}s`);
   process.exit(0);

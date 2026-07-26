@@ -27,6 +27,8 @@ Reassess it during planning and after every milestone.
 | E-008 | Independently validate a dark-mode-specific sequential color ramp for the choropleth | Currently reuses the light-mode ramp hexes in dark mode, unverified against the dark surface | Low | Low | M2 build | Noted as a known limitation in `12-visual-style-guide.md` | `CANDIDATE` | Unscheduled |
 | E-009 | Add measles to the county-level drill-down | `measles_county.parquet`'s `geography` codes turned out to be mostly standard county FIPS (resolves the original Q-002 concern) — feasible via exact-match join against `us-atlas`'s county set, dropping non-matching pseudo-codes | Medium | Low-medium | M2 build (county pipeline pattern already exists) | Discovered during M2 build; see `10-technical-specification.md` schema notes | `CANDIDATE` | Unscheduled |
 | E-010 | Keyboard-operable equivalent for map state-click drill-down | Currently mouse/touch-only; the style guide requires a keyboard equivalent for every interactive element | Medium (accessibility gap) | Low-medium (e.g. a focusable state list alongside the map) | M2 build | Style guide accessibility standard, not yet implemented | `CANDIDATE` | Unscheduled |
+| E-011 | County-level MMR coverage (`wapo_vax_counties.parquet`) | Brief specifically asks for MMR at county level; would let the vaccination panel drill down like the disease maps do | Medium | Medium (needs clarification first, not just wiring) | M5 build | Discovered during M5: the file's `wapo_county_vax_rate` didn't reconcile with its own sibling file's exemption-rate columns at the school level (e.g. a school reading 1% overall rate but 0% exemptions) — deferred rather than risk a mislabeled metric | `CANDIDATE` | Unscheduled — needs schema clarification (check PopHIVE docs/maintainers or the original WaPo methodology) before building |
+| E-012 | Surface additional childhood vaccines beyond MMR (DTaP, polio, HepA/B, varicella, Combined 7 Series — all present in `nis_overall.parquet`'s `vaccine` column) | Brief lists these as in-scope vaccination topics; same pipeline pattern as MMR, just needs a vaccine selector | Low-medium | Low (data already available, same file just different filter value) | M5 build | Brief section 3 topic list | `CANDIDATE` | Unscheduled |
 
 ## Enhancement details
 
@@ -83,3 +85,4 @@ Reassess it during planning and after every milestone.
 |---|---|---|---|---|
 | 2026-07-25 | Claude Code | E-001 through E-005 | — | — |
 | 2026-07-26 | Claude Code | E-006 through E-010 (discovered during M2 build) | — | — |
+| 2026-07-26 | Claude Code | E-011, E-012 (discovered during M5 build) | — | — |

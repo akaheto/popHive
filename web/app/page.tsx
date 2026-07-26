@@ -2,10 +2,12 @@ import { Dashboard, type DashboardProps } from "@/components/Dashboard";
 import overviewJson from "@/data/generated/overview.json";
 import statesJson from "@/data/generated/states.json";
 import countiesJson from "@/data/generated/counties.json";
+import vaccinationJson from "@/data/generated/vaccination.json";
 
 const overview = overviewJson as DashboardProps["overview"];
 const states = statesJson as unknown as DashboardProps["states"];
 const counties = countiesJson as unknown as DashboardProps["counties"];
+const vaccination = vaccinationJson as unknown as DashboardProps["vaccination"];
 
 export default function Home() {
   return (
@@ -20,7 +22,12 @@ export default function Home() {
             Health). Personal reference — not a clinical or outbreak-classification tool.
           </p>
         </header>
-        <Dashboard overview={overview} states={states} counties={counties} />
+        <Dashboard
+          overview={overview}
+          states={states}
+          counties={counties}
+          vaccination={vaccination}
+        />
       </main>
     </div>
   );

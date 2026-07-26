@@ -57,7 +57,7 @@ A backlog item is ready when:
 | M2 | National map + overview strip | Choropleth (state+county) for 4 diseases, disease/signal selectors, overview strip | Claude Code | No deadline | `IN PROGRESS` | 2026-07-25 | |
 | M3 | NYC DOHMH research spike | Recorded decision: blend borough data or keep HSA-level | Claude Code | No deadline | `COMPLETE` | 2026-07-26 | 2026-07-26 |
 | M4 | Tri-state/NYC pinned view | County drill-down for NY/NJ/CT + NYC boroughs, per M3 outcome | Claude Code | No deadline | `IN PROGRESS` | 2026-07-26 | |
-| M5 | Vaccination-coverage layer | MMR (+ other childhood vaccines) paired with measles map | Claude Code | No deadline | `NOT STARTED` | | |
+| M5 | Vaccination-coverage layer | MMR (+ other childhood vaccines) paired with measles map | Claude Code | No deadline | `IN PROGRESS` | 2026-07-26 | |
 | M6 | Chronic-disease/behavioral-health tab | Separate slower-cadence tab | Claude Code | No deadline | `NOT STARTED` | | |
 | M7 | Scheduled rebuild + visual/accessibility pass | Vercel Cron wired, style guide applied consistently | Claude Code | No deadline | `NOT STARTED` | | |
 | M8 | Test, QA, and close-out | All ACs verified, QA passed, retro complete | Claude Code | No deadline | `NOT STARTED` | | |
@@ -160,7 +160,22 @@ A backlog item is ready when:
 - Owner: Claude Code
 - Dependencies: M2 (measles map).
 - Acceptance criteria: AC-5.
-- Status: `NOT STARTED`
+- Status: `IN PROGRESS`
+- Completion note: Built two independent MMR coverage series —
+  `mmr_coverage_healthmap` (verified exact match to the brief's reference figures: US
+  69.0%, MA 79.4%, ME 77.8%, VT 76.9%, CT 76.5%, MN 75.7%, as of 2024-12-31) and CDC
+  NIS's "≥1 Dose MMR" (as of 2024-11-30, reading ~97-99% — a real, large discrepancy
+  from HealthMap, shown with a source toggle rather than reconciled). Investigated
+  WaPo's school/county-level vaccination file (`wapo_vax_counties.parquet`) but found
+  its rate values didn't hang together with its own exemption-rate columns (e.g. a
+  school showing 1% overall rate and 0% exemptions) — deferred rather than ship a
+  possibly-mislabeled county metric; tracked as a future enhancement pending
+  clarification. Panel appears directly under the measles map (per the brief's "paired
+  visually" request) with the as-of dates prominently flagged as much older than the
+  case map. Typecheck/lint clean; dev server confirmed serving without errors.
+  Interactive/visual browser verification still pending (same deferred item as M2/M4).
+- Evidence: `web/lib/pophive/vaccination.ts`, `web/components/Dashboard.tsx`; pipeline
+  console output.
 
 ### M6 — Chronic-disease/behavioral-health tab
 

@@ -2,3 +2,4 @@ node_modules/
 .next/
 web/.env*.local
 web/data/generated/
+.DS_Store

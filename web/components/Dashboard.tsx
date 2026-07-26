@@ -55,7 +55,18 @@ export interface DashboardProps {
     covid: CountySeries;
     rsv: CountySeries;
   };
+  vaccination: {
+    mmrHealthmap: SignalSeries;
+    mmrNis: SignalSeries;
+  };
 }
+
+const MMR_SOURCES = ["mmrHealthmap", "mmrNis"] as const;
+type MmrSource = (typeof MMR_SOURCES)[number];
+const MMR_SOURCE_LABEL: Record<MmrSource, string> = {
+  mmrHealthmap: "HealthMap",
+  mmrNis: "CDC NIS",
+};
 
 function seriesToMapData(series: SignalSeries): Record<string, MapDatum> {
   const out: Record<string, MapDatum> = {};
@@ -80,7 +91,7 @@ function countySeriesToMapData(series: CountySeries): Record<string, MapDatum> {
   return out;
 }
 
-export function Dashboard({ overview, states, counties }: DashboardProps) {
+export function Dashboard({ overview, states, counties, vaccination }: DashboardProps) {
   const [disease, setDisease] = useState<Disease>("flu");
   const [respiratorySignal, setRespiratorySignal] =
     useState<(typeof RESPIRATORY_SIGNALS)[number]>("CDC NSSP");
@@ -90,6 +101,7 @@ export function Dashboard({ overview, states, counties }: DashboardProps) {
     null
   );
   const [triStateView, setTriStateView] = useState(false);
+  const [mmrSource, setMmrSource] = useState<MmrSource>("mmrHealthmap");
 
   const isMeasles = disease === "measles";
   const canDrillDown = !isMeasles;
@@ -104,6 +116,9 @@ export function Dashboard({ overview, states, counties }: DashboardProps) {
     if (isMeasles || (!drilldown && !triStateView)) return {};
     return countySeriesToMapData(counties[disease as RespiratoryDisease]);
   }, [isMeasles, drilldown, triStateView, disease, counties]);
+
+  const mmrSeries = vaccination[mmrSource];
+  const mmrMapData = useMemo(() => seriesToMapData(mmrSeries), [mmrSeries]);
 
   function handleSelectDisease(next: Disease) {
     setDisease(next);
@@ -244,6 +259,45 @@ export function Dashboard({ overview, states, counties }: DashboardProps) {
             stateFips={drilldown.fips}
             onBack={() => setDrilldown(null)}
           />
+        </div>
+      )}
+
+      {isMeasles && !triStateView && !drilldown && (
+        <div className="border-t pt-6" style={{ borderColor: "var(--color-border-default)" }}>
+          <div className="mb-2 flex flex-wrap items-center gap-3">
+            <h3 className="text-sm font-medium" style={{ color: "var(--color-text-primary)" }}>
+              MMR vaccination coverage &middot; paired with the measles map above
+            </h3>
+            <div className="flex gap-1 rounded-lg border p-1" style={{ borderColor: "var(--color-border-default)" }}>
+              {MMR_SOURCES.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setMmrSource(s)}
+                  className="rounded-md px-2.5 py-1 text-xs font-medium"
+                  style={{
+                    background: mmrSource === s ? "var(--color-bg-page)" : "transparent",
+                    color: "var(--color-text-secondary)",
+                    border:
+                      mmrSource === s
+                        ? "1px solid var(--color-border-default)"
+                        : "1px solid transparent",
+                  }}
+                >
+                  {MMR_SOURCE_LABEL[s]}
+                </button>
+              ))}
+            </div>
+          </div>
+          <p className="mb-1 text-xs" style={{ color: "var(--color-text-secondary)" }}>
+            HealthMap and CDC NIS measure MMR coverage differently and disagree
+            substantially (NIS reads much higher) — shown separately rather than
+            averaged. Coverage data lags case data by months.
+          </p>
+          <p className="mb-2 text-xs font-medium" style={{ color: "var(--color-state-low)" }}>
+            {MMR_SOURCE_LABEL[mmrSource]} data as of {mmrSeries.asOf} — much older than
+            the measles case map above.
+          </p>
+          <Choropleth view="states" data={mmrMapData} unit="%" />
         </div>
       )}
     </div>
