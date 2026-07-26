@@ -22,6 +22,11 @@ Reassess it during planning and after every milestone.
 | E-003 | Cross-source measles cross-check surfaced in UI (JHU tracker vs. CDC weekly count) | Brief notes these two sources can disagree/lag differently; surfacing both builds trust | Medium | Low-medium | M2 | Brief section 7 | `CANDIDATE` | Unscheduled |
 | E-004 | Historical trend charts (beyond current "% of 2-year peak") | Richer context than a single snapshot number | Medium | Medium | M2 | Discovery, general dashboard value | `CANDIDATE` | Unscheduled |
 | E-005 | Alerting/notification on level change (e.g. a disease crossing to "high") | Would remove the need to check manually | Low (explicitly out of scope for v1 per discovery) | Medium | M2 | Discovery (out-of-scope confirmation) | `CANDIDATE` | Unscheduled |
+| E-006 | Wire remaining signals (CDC RespNET, ILINet, Kinsa, Epic Cosmos, Delphi claims) into the state-level signal toggle | More complete "signals disagree" picture beyond the 3 currently wired (NSSP/NWSS/NHSN) | Medium | Low-medium (data already present in `*_overall_trends.parquet`, just needs UI wiring + unit handling) | M2 build | Discovered during M2 build | `CANDIDATE` | Unscheduled |
+| E-007 | Lazy-load county JSON per state instead of shipping the full ~1.2MB `counties.json` upfront | Faster initial page load | Low-medium | Low (API route or server action returning one state's slice) | M2 build | Discovered during M2 build | `CANDIDATE` | Unscheduled |
+| E-008 | Independently validate a dark-mode-specific sequential color ramp for the choropleth | Currently reuses the light-mode ramp hexes in dark mode, unverified against the dark surface | Low | Low | M2 build | Noted as a known limitation in `12-visual-style-guide.md` | `CANDIDATE` | Unscheduled |
+| E-009 | Add measles to the county-level drill-down | `measles_county.parquet`'s `geography` codes turned out to be mostly standard county FIPS (resolves the original Q-002 concern) — feasible via exact-match join against `us-atlas`'s county set, dropping non-matching pseudo-codes | Medium | Low-medium | M2 build (county pipeline pattern already exists) | Discovered during M2 build; see `10-technical-specification.md` schema notes | `CANDIDATE` | Unscheduled |
+| E-010 | Keyboard-operable equivalent for map state-click drill-down | Currently mouse/touch-only; the style guide requires a keyboard equivalent for every interactive element | Medium (accessibility gap) | Low-medium (e.g. a focusable state list alongside the map) | M2 build | Style guide accessibility standard, not yet implemented | `CANDIDATE` | Unscheduled |
 
 ## Enhancement details
 
@@ -77,3 +82,4 @@ Reassess it during planning and after every milestone.
 | Date | Reviewed by | Added | Reprioritized | Delivered or closed |
 |---|---|---|---|---|
 | 2026-07-25 | Claude Code | E-001 through E-005 | — | — |
+| 2026-07-26 | Claude Code | E-006 through E-010 (discovered during M2 build) | — | — |

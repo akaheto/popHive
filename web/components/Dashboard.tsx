@@ -9,9 +9,14 @@ import type {
   SignalSeries,
   CountySeries,
 } from "@/lib/pophive/types";
+import { NYC_BOROUGH_FIPS } from "@/lib/nycDohmh";
 
 type RespiratoryDisease = "flu" | "covid" | "rsv";
 type Disease = RespiratoryDisease | "measles";
+
+// NY, NJ, CT — the pinned tri-state view (brief section 5B).
+const TRI_STATE_FIPS = ["36", "34", "09"];
+const NYC_BOROUGH_FIPS_LIST = Object.values(NYC_BOROUGH_FIPS);
 
 const RESPIRATORY_SIGNALS = ["CDC NSSP", "CDC NWSS", "CDC NHSN"] as const;
 const MEASLES_SIGNALS = ["weekly", "cumulative"] as const;
@@ -84,6 +89,7 @@ export function Dashboard({ overview, states, counties }: DashboardProps) {
   const [drilldown, setDrilldown] = useState<{ fips: string; name: string } | null>(
     null
   );
+  const [triStateView, setTriStateView] = useState(false);
 
   const isMeasles = disease === "measles";
   const canDrillDown = !isMeasles;
@@ -95,13 +101,19 @@ export function Dashboard({ overview, states, counties }: DashboardProps) {
   const stateMapData = useMemo(() => seriesToMapData(activeSeries), [activeSeries]);
 
   const countyMapData = useMemo(() => {
-    if (isMeasles || !drilldown) return {};
+    if (isMeasles || (!drilldown && !triStateView)) return {};
     return countySeriesToMapData(counties[disease as RespiratoryDisease]);
-  }, [isMeasles, drilldown, disease, counties]);
+  }, [isMeasles, drilldown, triStateView, disease, counties]);
 
   function handleSelectDisease(next: Disease) {
     setDisease(next);
     setDrilldown(null);
+    if (next === "measles") setTriStateView(false);
+  }
+
+  function handleToggleTriState() {
+    setDrilldown(null);
+    setTriStateView((v) => !v);
   }
 
   return (
@@ -169,13 +181,47 @@ export function Dashboard({ overview, states, counties }: DashboardProps) {
             ))}
         </div>
 
+        <button
+          onClick={handleToggleTriState}
+          disabled={isMeasles}
+          className="rounded-lg border px-3 py-1.5 text-sm font-medium disabled:opacity-40"
+          style={{
+            borderColor: "var(--color-border-default)",
+            background: triStateView ? "var(--color-focus)" : "transparent",
+            color: triStateView ? "white" : "var(--color-text-secondary)",
+          }}
+          title={isMeasles ? "No county-level measles data yet" : undefined}
+        >
+          Tri-State + NYC
+        </button>
+
         <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
           Data current as of {activeSeries.asOf} &middot; generated{" "}
           {new Date(overview.generatedAt).toLocaleString()}
         </span>
       </div>
 
-      {!drilldown ? (
+      {triStateView ? (
+        <div>
+          <h3 className="mb-2 text-sm font-medium" style={{ color: "var(--color-text-primary)" }}>
+            NY / NJ / CT counties &middot; {DISEASE_LABEL[disease]} ED visits % &middot; NYC
+            boroughs outlined
+          </h3>
+          <p className="mb-2 text-xs" style={{ color: "var(--color-text-secondary)" }}>
+            NYC borough values come from NYC DOHMH&apos;s own open data (true
+            per-borough), not PopHIVE&apos;s NSSP feed, which sometimes shares one value
+            across all 5 boroughs.
+          </p>
+          <Choropleth
+            view="counties"
+            data={countyMapData}
+            unit="%"
+            stateFips={TRI_STATE_FIPS}
+            highlightFips={NYC_BOROUGH_FIPS_LIST}
+            onBack={() => setTriStateView(false)}
+          />
+        </div>
+      ) : !drilldown ? (
         <Choropleth
           view="states"
           data={stateMapData}

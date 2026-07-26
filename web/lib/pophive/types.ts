@@ -40,6 +40,11 @@ export interface CountyDatum {
   value: number;
   isStateEstimate: boolean;
   asOf: string;
+  /** Defaults to the parent CountySeries.source when omitted (e.g. "CDC
+   * NSSP"). Set explicitly when a specific county's value came from a
+   * different source than the rest of the series — e.g. "NYC DOHMH" for a
+   * borough blended in per D-008. */
+  source?: string;
 }
 
 export interface CountySeries {

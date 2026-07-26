@@ -14,6 +14,7 @@ import {
   buildMeaslesCumulativeSeries,
 } from "../lib/pophive/measles";
 import { buildCountySeries } from "../lib/pophive/countyEdVisits";
+import { fetchAllBoroughData, type RespiratoryDisease as NycDisease } from "../lib/nycDohmh";
 
 const OUT_DIR = path.join(__dirname, "..", "data", "generated");
 
@@ -71,13 +72,48 @@ async function main() {
   await writeFile(path.join(OUT_DIR, "states.json"), JSON.stringify(states, null, 2));
 
   console.log("\nBuilding county-level series (ED visits %)...");
+
+  // NYC DOHMH borough blend (D-008): a secondary source, so its failure
+  // must never fail the whole build — fall back to the existing
+  // PopHIVE-derived counties (HSA-level + disclosure) for NYC if this
+  // doesn't come back.
+  let boroughData: Record<NycDisease, Awaited<ReturnType<typeof fetchAllBoroughData>>["flu"]> | null =
+    null;
+  try {
+    boroughData = await fetchAllBoroughData();
+    console.log(
+      `  NYC DOHMH: fetched borough data for ${Object.keys(boroughData).length} diseases`
+    );
+  } catch (err) {
+    console.warn(
+      "  NYC DOHMH fetch failed — NYC boroughs will fall back to PopHIVE HSA-level + disclosure:",
+      err
+    );
+  }
+
   const counties: Record<string, unknown> = {};
   for (const disease of RESPIRATORY_DISEASES) {
     const series = await buildCountySeries(disease);
+
+    if (boroughData) {
+      const byFips = new Map(series.counties.map((c) => [c.countyFips, c]));
+      for (const b of boroughData[disease]) {
+        byFips.set(b.countyFips, {
+          countyFips: b.countyFips,
+          value: b.value,
+          isStateEstimate: false,
+          asOf: b.asOf,
+          source: b.source,
+        });
+      }
+      series.counties = Array.from(byFips.values());
+    }
+
     counties[disease] = series;
     const estimated = series.counties.filter((c) => c.isStateEstimate).length;
+    const dohmhCount = series.counties.filter((c) => c.source === "NYC DOHMH").length;
     console.log(
-      `  ${disease}: ${series.counties.length} counties (${estimated} state-estimate fallback), as of ${series.asOf}`
+      `  ${disease}: ${series.counties.length} counties (${estimated} state-estimate fallback, ${dohmhCount} NYC DOHMH), as of ${series.asOf}`
     );
   }
   await writeFile(path.join(OUT_DIR, "counties.json"), JSON.stringify(counties, null, 2));

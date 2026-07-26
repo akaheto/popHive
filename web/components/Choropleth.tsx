@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { geoPath } from "d3-geo";
 import { scaleLinear } from "d3-scale";
-import { usStates, usNation, countiesForState } from "@/lib/topology";
+import { usStates, usNation, countiesForStates } from "@/lib/topology";
 import type { Feature, Geometry } from "geojson";
 
 // Sequential blue ramp, light -> dark (see globals.css / visual style guide).
@@ -39,8 +39,12 @@ interface ChoroplethProps {
   /** Keyed by 2-digit state FIPS or 5-digit county FIPS. */
   data: Record<string, MapDatum>;
   unit: string;
-  /** For the counties view: which state we're drilled into. */
-  stateFips?: string;
+  /** For the counties view: which state(s) we're drilled into. Accepts
+   * multiple states for pinned multi-state panels (e.g. tri-state/NYC). */
+  stateFips?: string | string[];
+  /** County FIPS to visually call out with a distinct outline (e.g. the 5
+   * NYC boroughs within the tri-state view). */
+  highlightFips?: string[];
   onSelectState?: (fips: string, name: string) => void;
   onBack?: () => void;
 }
@@ -57,6 +61,7 @@ export function Choropleth({
   data,
   unit,
   stateFips,
+  highlightFips,
   onSelectState,
   onBack,
 }: ChoroplethProps) {
@@ -69,10 +74,9 @@ export function Choropleth({
 
   const path = useMemo(() => geoPath(), []);
 
+  const stateFipsList = Array.isArray(stateFips) ? stateFips : [stateFips ?? ""];
   const features =
-    view === "states"
-      ? usStates.features
-      : countiesForState(stateFips ?? "").features;
+    view === "states" ? usStates.features : countiesForStates(stateFipsList).features;
 
   const values = Object.values(data).map((d) => d.value);
   const maxValue = values.length ? Math.max(...values) : 1;
@@ -155,6 +159,20 @@ export function Choropleth({
                 pointerEvents="none"
               />
             ))}
+        {view === "counties" &&
+          highlightFips &&
+          features
+            .filter((f) => highlightFips.includes(String(f.id)))
+            .map((f) => (
+              <path
+                key={`highlight-${f.id}`}
+                d={path(f as Feature<Geometry>) ?? undefined}
+                fill="none"
+                stroke="var(--color-focus)"
+                strokeWidth={1.5}
+                pointerEvents="none"
+              />
+            ))}
       </svg>
 
       {hover && (
@@ -222,6 +240,15 @@ export function Choropleth({
               style={{ borderColor: "var(--color-text-muted)" }}
             />
             Estimated (not county-specific)
+          </span>
+        )}
+        {view === "counties" && highlightFips && (
+          <span className="flex items-center gap-1">
+            <span
+              className="inline-block h-2.5 w-2.5 rounded-sm border-2"
+              style={{ borderColor: "var(--color-focus)" }}
+            />
+            NYC boroughs
           </span>
         )}
       </div>

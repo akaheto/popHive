@@ -28,10 +28,16 @@ export const usNation = feature(
 export function countiesForState(
   stateFips: string
 ): FeatureCollection<Geometry, CountyProps> {
+  return countiesForStates([stateFips]);
+}
+
+export function countiesForStates(
+  stateFipsList: string[]
+): FeatureCollection<Geometry, CountyProps> {
   return {
     type: "FeatureCollection",
     features: usCounties.features.filter((f) =>
-      String(f.id).startsWith(stateFips)
+      stateFipsList.some((sf) => String(f.id).startsWith(sf))
     ),
   };
 }

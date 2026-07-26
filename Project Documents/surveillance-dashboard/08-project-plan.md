@@ -55,8 +55,8 @@ A backlog item is ready when:
 |---|---|---|---|---|---|---|---|
 | M1 | Scaffold + data pipeline foundation | Working Next.js/Vercel scaffold, validated parquet→JSON pipeline for one bundle | Claude Code | No deadline | `COMPLETE` | 2026-07-25 | 2026-07-25 |
 | M2 | National map + overview strip | Choropleth (state+county) for 4 diseases, disease/signal selectors, overview strip | Claude Code | No deadline | `IN PROGRESS` | 2026-07-25 | |
-| M3 | NYC DOHMH research spike | Recorded decision: blend borough data or keep HSA-level | Claude Code | No deadline | `NOT STARTED` | | |
-| M4 | Tri-state/NYC pinned view | County drill-down for NY/NJ/CT + NYC boroughs, per M3 outcome | Claude Code | No deadline | `NOT STARTED` | | |
+| M3 | NYC DOHMH research spike | Recorded decision: blend borough data or keep HSA-level | Claude Code | No deadline | `COMPLETE` | 2026-07-26 | 2026-07-26 |
+| M4 | Tri-state/NYC pinned view | County drill-down for NY/NJ/CT + NYC boroughs, per M3 outcome | Claude Code | No deadline | `IN PROGRESS` | 2026-07-26 | |
 | M5 | Vaccination-coverage layer | MMR (+ other childhood vaccines) paired with measles map | Claude Code | No deadline | `NOT STARTED` | | |
 | M6 | Chronic-disease/behavioral-health tab | Separate slower-cadence tab | Claude Code | No deadline | `NOT STARTED` | | |
 | M7 | Scheduled rebuild + visual/accessibility pass | Vercel Cron wired, style guide applied consistently | Claude Code | No deadline | `NOT STARTED` | | |
@@ -129,7 +129,13 @@ A backlog item is ready when:
 - Acceptance criteria: AC-10.
 - Definition of done: Decision recorded with evidence; no code committed to blending
   unless the decision says to.
-- Status: `NOT STARTED`
+- Status: `COMPLETE`
+- Completion note: Verified `github.com/nychealth/respiratory-illness-data` provides
+  true per-borough ED-visit % for flu/COVID/RSV (not measles), updated weekly, current
+  through the same date as PopHIVE. Decision D-008 recorded: blend it, with automatic
+  fallback to the existing HSA-level + disclosure path if a borough's row is ever
+  missing/stale.
+- Evidence: D-008 in `03-decisions.md`; schema notes in `10-technical-specification.md`.
 
 ### M4 — Tri-state/NYC pinned view
 
@@ -138,7 +144,15 @@ A backlog item is ready when:
 - Dependencies: M2, M3.
 - Planned deliverables: Tri-state/NYC panel, HSA-disclosure logic (or DOHMH blend per M3).
 - Acceptance criteria: AC-4.
-- Status: `NOT STARTED`
+- Status: `IN PROGRESS`
+- Completion note: Built — `lib/nycDohmh.ts` fetches real per-borough ED-visit data
+  (D-008) and merges it into the county pipeline with source tagging; a pinned
+  "Tri-State + NYC" button jumps directly to a combined NY/NJ/CT county view with the 5
+  NYC boroughs visually outlined and a disclosure note explaining the DOHMH-vs-NSSP
+  distinction. Typecheck/lint clean; server-rendered HTML confirmed the button renders.
+  Interactive/visual browser verification still pending (same deferred item as M2).
+- Evidence: `web/lib/nycDohmh.ts`, `web/components/{Dashboard,Choropleth}.tsx`; pipeline
+  console output showing 5 NYC DOHMH-sourced counties per disease.
 
 ### M5 — Vaccination-coverage layer
 

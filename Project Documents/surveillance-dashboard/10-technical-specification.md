@@ -90,7 +90,25 @@ implemented code.
 | PopHIVE raw parquet (`raw.githubusercontent.com/PopHIVE/Ingest`) | Inbound (fetch) | Source data for all panels | None (public) | Parquet files under `<bundle>/dist/<file>.parquet` | Build fails loudly rather than shipping partial/stale-without-disclosure data |
 | PopHIVE MCP server (`https://mcp.pophive.org/mcp`) | Inbound (design-time only) | Used to produce reference figures and the in-chat preview; not part of the production pipeline (D-001) | None documented | MCP tools: `get_overview`, `get_current_status`, `get_trend`, `get_map`, `compare`, `get_coverage`, `get_data` | N/A — not used at runtime |
 | Vercel Cron | Inbound (scheduler → deploy hook) | Trigger scheduled rebuilds | Vercel account-scoped | `vercel.json` cron config | Missed rebuilds are visible via stale `as_of` dates on the site |
-| NYC DOHMH open data (candidate) | Inbound (fetch, if M3 approves) | True per-borough figures | Likely none (public open data) | Unconfirmed — subject of M3 spike | N/A until M3 resolves |
+| NYC DOHMH open data (`raw.githubusercontent.com/nychealth/respiratory-illness-data`) | Inbound (fetch) | True per-borough ED-visit % for flu/COVID/RSV (D-008, M3 outcome) | None (public) | `data/ED_data_{influenza,COVID-19,RSV}.csv`, wide format, one column per borough, updated weekly (Thursdays) | If a borough's row is missing/stale for the current week, that borough falls back to PopHIVE's HSA-level value with disclosure — never blocks the build |
+
+### Confirmed NYC DOHMH schema (M3 spike, 2026-07-26)
+
+Verified via direct fetch of the raw CSVs (not assumed from the repo's README):
+
+- `ED_data_influenza.csv`, `ED_data_COVID-19.csv`, `ED_data_RSV.csv` — each:
+  `date, {Disease} visits overall, visits 0-4, visits 5-17, visits 18-64, visits 65+,
+  visits Bronx, visits Brooklyn, visits Queens, visits Manhattan, visits Staten Island,
+  {Disease} hospitalizations overall, ...(same age/borough breakdown)`.
+- Confirmed borough values are genuinely distinct per row (not a shared/duplicated
+  value), unlike PopHIVE's NSSP HSA-level rows.
+- Confirmed continuously updated through the same week as PopHIVE at check time
+  (2026-07-18) — not gapped outside the Oct-May flu/RSV season as the repo's human-
+  readable weekly bulletins might suggest; that description applies to the PDF
+  bulletins, not this CSV feed.
+- No measles file exists in this repo — measles has no per-borough source at all
+  (PopHIVE's own measles data is state-level only), disclosed as such in the UI rather
+  than silently omitted.
 
 ## Data model and storage
 

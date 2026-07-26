@@ -117,6 +117,43 @@ Record choices that affect scope, architecture, behavior, risk, or schedule.
   in M1 alongside the parquet schema check.
 - Approved by: Ben Aheto
 
+### D-008 — Blend NYC DOHMH's own open data for true per-borough ED-visit figures (M3 spike outcome)
+
+- Date: 2026-07-26
+- Status: `ACCEPTED`
+- Context: D-004 deferred NYC borough precision behind a research spike (M3), shipping
+  HSA-level + disclosure first. That spike is this decision.
+- Findings: `github.com/nychealth/respiratory-illness-data` (raw CSVs, no auth) publishes
+  `ED_data_influenza.csv`, `ED_data_COVID-19.csv`, and `ED_data_RSV.csv`, each with true
+  per-borough columns (Bronx/Brooklyn/Queens/Manhattan/Staten Island) carrying visibly
+  distinct values per borough (not the HSA-shared duplication seen in PopHIVE's NSSP
+  feed) — verified directly via `raw.githubusercontent.com`, not assumed from
+  documentation. All three files are updated weekly (confirmed rows through
+  2026-07-18, matching PopHIVE's own most-recent date at time of check) — not
+  seasonally gapped, contrary to an initial concern from the repo's README describing
+  "weekly reports... October through May" (that description applies to the human-
+  readable PDF bulletins; the open-data CSV feed itself continues through summer at
+  lower activity, confirmed empirically). No measles file exists in this repo — measles
+  remains unavailable at true per-borough resolution from this source.
+- Options considered: (a) blend this source into the county pipeline, preferring it for
+  the 5 NYC borough FIPS when available, falling back to PopHIVE's HSA-level + disclosure
+  otherwise; (b) conclude the spike negatively and keep HSA-level indefinitely (the
+  fallback path D-004 already established).
+- Decision: (a) — blend it, with (b)'s HSA-level + disclosure path kept as the automatic
+  fallback for any week the DOHMH file lacks a fresh-enough row (e.g. an unexpected
+  reporting gap), so the site never silently reverts to false precision.
+- Rationale: Real per-borough data exists, is current, and is free/no-auth — declining to
+  use it would leave a known, avoidable imprecision in the tri-state/NYC view.
+- Consequences: Adds a second external data source outside PopHIVE (different cadence
+  anchor — Thursdays vs. PopHIVE's Tue/Fri — and its own geography scheme: plain borough
+  names in wide columns, not FIPS), so the pipeline needs its own crosswalk (5 NYC county
+  FIPS <-> {Bronx, Brooklyn, Queens, Manhattan, Staten Island} column names) and its own
+  `source` tag per county row so provenance (CDC NSSP vs. NYC DOHMH) stays disclosed in
+  the UI, not just silently blended in.
+- Approved by: Claude Code, per the M3 milestone's pre-established owner/scope in
+  `08-project-plan.md`; consistent with the autonomous "keep going" instruction covering
+  plan execution, not a new material scope change requiring separate confirmation.
+
 ## Deviations
 
 | Date | Planned | Actual | Reason | Impact | Approved by |
