@@ -35,6 +35,19 @@ export interface SignalSeries {
   states: StateDatum[];
 }
 
+// Same shape as SignalSeries, for state-level series that aren't tied to one
+// of the four outbreak diseases (e.g. chronic-disease/behavioral-health
+// indicators) — kept as its own type rather than force-fitting a
+// `DiseaseTopic` value that wouldn't mean anything.
+export interface IndicatorSeries {
+  topic: string;
+  signal: string;
+  source: string;
+  unit: string;
+  asOf: string;
+  states: StateDatum[];
+}
+
 export interface CountyDatum {
   countyFips: string;
   value: number;

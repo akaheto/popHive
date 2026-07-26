@@ -58,7 +58,7 @@ A backlog item is ready when:
 | M3 | NYC DOHMH research spike | Recorded decision: blend borough data or keep HSA-level | Claude Code | No deadline | `COMPLETE` | 2026-07-26 | 2026-07-26 |
 | M4 | Tri-state/NYC pinned view | County drill-down for NY/NJ/CT + NYC boroughs, per M3 outcome | Claude Code | No deadline | `IN PROGRESS` | 2026-07-26 | |
 | M5 | Vaccination-coverage layer | MMR (+ other childhood vaccines) paired with measles map | Claude Code | No deadline | `IN PROGRESS` | 2026-07-26 | |
-| M6 | Chronic-disease/behavioral-health tab | Separate slower-cadence tab | Claude Code | No deadline | `NOT STARTED` | | |
+| M6 | Chronic-disease/behavioral-health tab | Separate slower-cadence tab | Claude Code | No deadline | `IN PROGRESS` | 2026-07-26 | |
 | M7 | Scheduled rebuild + visual/accessibility pass | Vercel Cron wired, style guide applied consistently | Claude Code | No deadline | `NOT STARTED` | | |
 | M8 | Test, QA, and close-out | All ACs verified, QA passed, retro complete | Claude Code | No deadline | `NOT STARTED` | | |
 
@@ -183,7 +183,24 @@ A backlog item is ready when:
 - Owner: Claude Code
 - Dependencies: M1 (pipeline supports claims-based bundles).
 - Acceptance criteria: AC-6.
-- Status: `NOT STARTED`
+- Status: `IN PROGRESS`
+- Completion note: Built a representative slice — diabetes (Epic Cosmos ICD10),
+  obesity (Epic Cosmos BMI), and opioid overdose death rate (CDC/NCHS) — as a fully
+  separate "Chronic Disease & Behavioral Health" tab with its own indicator selector,
+  navigationally distinct from the outbreak tracker (satisfies "does not auto-refresh
+  on the same cadence" via being a wholly separate view, not a shared surface). Caught
+  a real data-quality issue: `overdose_by_geography_and_source.parquet`'s `value`
+  column produced implausible state rates (~120-140 deaths/100k, when real-world
+  worst-case is ~40-55); used `overdose_deaths_state.parquet` instead after its numbers
+  passed a sanity check against known CDC ranges. The brief's full topic list (cancer
+  screenings, cardiovascular/depression/diabetes screening, wellness visits, adult
+  vaccination, anxiety, depression, adhd, opioid use disorder, injury/firearm deaths)
+  is NOT fully covered — deliberately scoped down to 3 indicators for v1, rest tracked
+  in `11-future-enhancements.md`. Typecheck/lint clean; dev server verified.
+  Interactive/visual browser verification still pending (same deferred item as
+  M2/M4/M5).
+- Evidence: `web/lib/pophive/chronic.ts`, `web/components/ChronicDiseasePanel.tsx`;
+  pipeline console output.
 
 ### M7 — Scheduled rebuild + visual/accessibility pass
 

@@ -15,6 +15,11 @@ import {
 } from "../lib/pophive/measles";
 import { buildCountySeries } from "../lib/pophive/countyEdVisits";
 import { buildMmrHealthmapSeries, buildMmrNisSeries } from "../lib/pophive/vaccination";
+import {
+  buildDiabetesSeries,
+  buildObesitySeries,
+  buildOpioidOverdoseSeries,
+} from "../lib/pophive/chronic";
 import { fetchAllBoroughData, type RespiratoryDisease as NycDisease } from "../lib/nycDohmh";
 
 const OUT_DIR = path.join(__dirname, "..", "data", "generated");
@@ -133,6 +138,22 @@ async function main() {
     path.join(OUT_DIR, "vaccination.json"),
     JSON.stringify(vaccination, null, 2)
   );
+
+  console.log("\nBuilding chronic-disease/behavioral-health series...");
+  const [diabetes, obesity, opioidOverdose] = await Promise.all([
+    buildDiabetesSeries(),
+    buildObesitySeries(),
+    buildOpioidOverdoseSeries(),
+  ]);
+  const chronic = { diabetes, obesity, opioidOverdose };
+  console.log(
+    `  Diabetes: ${diabetes.states.length} states, as of ${diabetes.asOf}`
+  );
+  console.log(`  Obesity: ${obesity.states.length} states, as of ${obesity.asOf}`);
+  console.log(
+    `  Opioid overdose: ${opioidOverdose.states.length} states, as of ${opioidOverdose.asOf}`
+  );
+  await writeFile(path.join(OUT_DIR, "chronic.json"), JSON.stringify(chronic, null, 2));
 
   console.log(`\nDone in ${((Date.now() - startedAt) / 1000).toFixed(1)}s`);
   process.exit(0);

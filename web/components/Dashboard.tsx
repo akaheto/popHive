@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Choropleth, type MapDatum } from "./Choropleth";
 import { OverviewStrip } from "./OverviewStrip";
+import { ChronicDiseasePanel, type ChronicDiseasePanelProps } from "./ChronicDiseasePanel";
 import type {
   OverviewCard,
   MeaslesOverviewCard,
@@ -59,6 +60,7 @@ export interface DashboardProps {
     mmrHealthmap: SignalSeries;
     mmrNis: SignalSeries;
   };
+  chronic: ChronicDiseasePanelProps;
 }
 
 const MMR_SOURCES = ["mmrHealthmap", "mmrNis"] as const;
@@ -91,7 +93,14 @@ function countySeriesToMapData(series: CountySeries): Record<string, MapDatum> {
   return out;
 }
 
-export function Dashboard({ overview, states, counties, vaccination }: DashboardProps) {
+export function Dashboard({
+  overview,
+  states,
+  counties,
+  vaccination,
+  chronic,
+}: DashboardProps) {
+  const [mainTab, setMainTab] = useState<"outbreak" | "chronic">("outbreak");
   const [disease, setDisease] = useState<Disease>("flu");
   const [respiratorySignal, setRespiratorySignal] =
     useState<(typeof RESPIRATORY_SIGNALS)[number]>("CDC NSSP");
@@ -133,6 +142,33 @@ export function Dashboard({ overview, states, counties, vaccination }: Dashboard
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="flex gap-1 rounded-lg border p-1 self-start" style={{ borderColor: "var(--color-border-default)" }}>
+        <button
+          onClick={() => setMainTab("outbreak")}
+          className="rounded-md px-3 py-1.5 text-sm font-medium"
+          style={{
+            background: mainTab === "outbreak" ? "var(--color-focus)" : "transparent",
+            color: mainTab === "outbreak" ? "white" : "var(--color-text-secondary)",
+          }}
+        >
+          Outbreak Tracker
+        </button>
+        <button
+          onClick={() => setMainTab("chronic")}
+          className="rounded-md px-3 py-1.5 text-sm font-medium"
+          style={{
+            background: mainTab === "chronic" ? "var(--color-focus)" : "transparent",
+            color: mainTab === "chronic" ? "white" : "var(--color-text-secondary)",
+          }}
+        >
+          Chronic Disease &amp; Behavioral Health
+        </button>
+      </div>
+
+      {mainTab === "chronic" ? (
+        <ChronicDiseasePanel {...chronic} />
+      ) : (
+        <>
       <OverviewStrip
         flu={overview.flu}
         covid={overview.covid}
@@ -299,6 +335,8 @@ export function Dashboard({ overview, states, counties, vaccination }: Dashboard
           </p>
           <Choropleth view="states" data={mmrMapData} unit="%" />
         </div>
+      )}
+      </>
       )}
     </div>
   );
