@@ -53,8 +53,8 @@ A backlog item is ready when:
 
 | ID | Milestone | Goal | Owner | Target | Status | Started | Completed |
 |---|---|---|---|---|---|---|---|
-| M1 | Scaffold + data pipeline foundation | Working Next.js/Vercel scaffold, validated parquet→JSON pipeline for one bundle | Claude Code | No deadline | `IN PROGRESS` | 2026-07-25 | |
-| M2 | National map + overview strip | Choropleth (state+county) for 4 diseases, disease/signal selectors, overview strip | Claude Code | No deadline | `NOT STARTED` | | |
+| M1 | Scaffold + data pipeline foundation | Working Next.js/Vercel scaffold, validated parquet→JSON pipeline for one bundle | Claude Code | No deadline | `COMPLETE` | 2026-07-25 | 2026-07-25 |
+| M2 | National map + overview strip | Choropleth (state+county) for 4 diseases, disease/signal selectors, overview strip | Claude Code | No deadline | `IN PROGRESS` | 2026-07-25 | |
 | M3 | NYC DOHMH research spike | Recorded decision: blend borough data or keep HSA-level | Claude Code | No deadline | `NOT STARTED` | | |
 | M4 | Tri-state/NYC pinned view | County drill-down for NY/NJ/CT + NYC boroughs, per M3 outcome | Claude Code | No deadline | `NOT STARTED` | | |
 | M5 | Vaccination-coverage layer | MMR (+ other childhood vaccines) paired with measles map | Claude Code | No deadline | `NOT STARTED` | | |
@@ -104,7 +104,20 @@ A backlog item is ready when:
   overview strip; data-quality rules applied in the pipeline.
 - Acceptance criteria: AC-1, AC-2, AC-3, AC-7, AC-8 (respiratory/measles bundles only).
 - Definition of done: as above.
-- Status: `NOT STARTED`
+- Status: `IN PROGRESS`
+- Start note: Started 2026-07-25, directly following M1.
+- Completion note: Build complete — data pipeline (overview cards, 3-signal state
+  series, county ED-visit series with disclosed state-estimate fallback), Choropleth
+  and OverviewStrip components, disease/signal selectors, drill-down navigation, all
+  wired into `app/page.tsx`. Typecheck/lint clean; dev server confirmed serving correct
+  content via server logs + rendered HTML inspection (52 SVG paths = 50 states + DC +
+  nation outline; card values match the pipeline's own verified output). Full
+  interactive/visual browser verification (colors, hover, click interaction, responsive
+  behavior, accessibility) intentionally deferred at the user's request — milestone
+  stays `IN PROGRESS` until that's done, per the "never claim completion while required
+  checks remain unrun" rule.
+- Evidence: `web/app`, `web/components`, `web/lib/pophive`; `/tmp/nextdev.log` server
+  output; rendered HTML spot-check (2026-07-26).
 
 ### M3 — NYC DOHMH research spike
 

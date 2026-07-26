@@ -7,24 +7,33 @@
 
 ## Progress
 
-- Completed: Gate 0 (discovery interview confirmed), Gate 1 (brief), Gate 2 (scope), Gate
-  3 planning artifacts (all 15 living documents scaffolded); D-006 (Next.js) and D-007
-  (DuckDB) confirmed with the user.
-- In progress: Entering Gate 4 — Execute, starting with M1.
-- Next: Scaffold the Next.js project and validate DuckDB against one real PopHIVE bundle
-  file (plan step 1).
+- Completed: Gate 0-3 planning artifacts; D-006/D-007 confirmed; M1 (scaffold + data
+  pipeline foundation, real schemas confirmed); M2 core build — data pipeline for all
+  four diseases (overview cards, multi-signal state series, county ED-visit series with
+  disclosed state-estimate fallback), choropleth map component, overview strip
+  component, and page wiring. Typecheck and lint pass clean; dev server verified via
+  server logs and rendered HTML (correct SVG path count, correct card content/values
+  matching the data pipeline's own console output).
+- In progress: Full interactive/visual browser verification (colors, hover tooltips,
+  click-to-drill-down, responsive layout, accessibility) — deferred at the user's
+  request, to be completed before M2 is marked done.
+- Next: Visual browser check, then AC verification for M2's acceptance criteria
+  (AC-1, AC-2, AC-3, AC-7, AC-8 partial).
 
 ## Current milestone
 
-- Milestone: M1 — Project scaffold + data pipeline foundation
-- Goal: Working Next.js/Vercel scaffold with a validated parquet-to-JSON pipeline (via
-  DuckDB) for one real PopHIVE bundle.
+- Milestone: M2 — National map + overview strip
+- Goal: Choropleth (state+county) for 4 diseases, disease/signal selectors, overview
+  strip, all built on the validated data pipeline.
 - Owner: Ben Aheto / Claude Code
 - Started: 2026-07-25
 - Target: No deadline
-- Definition of done: Plan steps 1–2 acceptance criteria met (see `02-plan.md`, `08-project-plan.md`).
-- Status: `IN PROGRESS`
-- Evidence: —
+- Definition of done: AC-1, AC-2, AC-3, AC-7, AC-8 (respiratory/measles) verified — see
+  `01-scope.md`.
+- Status: `IN PROGRESS` (build complete pending browser verification)
+- Evidence: `web/` app; pipeline console output cross-checked against PopHIVE's own
+  `get_current_status` calls and the brief's section 7 reference figures (see
+  `10-technical-specification.md`).
 
 ## Blockers
 

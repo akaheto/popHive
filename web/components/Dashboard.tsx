@@ -1,0 +1,205 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { Choropleth, type MapDatum } from "./Choropleth";
+import { OverviewStrip } from "./OverviewStrip";
+import type {
+  OverviewCard,
+  MeaslesOverviewCard,
+  SignalSeries,
+  CountySeries,
+} from "@/lib/pophive/types";
+
+type RespiratoryDisease = "flu" | "covid" | "rsv";
+type Disease = RespiratoryDisease | "measles";
+
+const RESPIRATORY_SIGNALS = ["CDC NSSP", "CDC NWSS", "CDC NHSN"] as const;
+const MEASLES_SIGNALS = ["weekly", "cumulative"] as const;
+
+const DISEASE_LABEL: Record<Disease, string> = {
+  flu: "Influenza",
+  covid: "COVID-19",
+  rsv: "RSV",
+  measles: "Measles",
+};
+
+const SIGNAL_LABEL: Record<string, string> = {
+  "CDC NSSP": "ED visits %",
+  "CDC NWSS": "Wastewater",
+  "CDC NHSN": "Hospitalizations",
+  weekly: "Weekly cases",
+  cumulative: "Cumulative (season)",
+};
+
+export interface DashboardProps {
+  overview: {
+    flu: OverviewCard;
+    covid: OverviewCard;
+    rsv: OverviewCard;
+    measles: MeaslesOverviewCard;
+    generatedAt: string;
+  };
+  states: {
+    flu: Record<string, SignalSeries>;
+    covid: Record<string, SignalSeries>;
+    rsv: Record<string, SignalSeries>;
+    measles: { weekly: SignalSeries; cumulative: SignalSeries };
+  };
+  counties: {
+    flu: CountySeries;
+    covid: CountySeries;
+    rsv: CountySeries;
+  };
+}
+
+function seriesToMapData(series: SignalSeries): Record<string, MapDatum> {
+  const out: Record<string, MapDatum> = {};
+  for (const s of series.states) {
+    out[s.stateFips] = { value: s.value, asOf: s.asOf };
+  }
+  return out;
+}
+
+function countySeriesToMapData(series: CountySeries): Record<string, MapDatum> {
+  const out: Record<string, MapDatum> = {};
+  for (const c of series.counties) {
+    out[c.countyFips] = {
+      value: c.value,
+      asOf: c.asOf,
+      isEstimate: c.isStateEstimate,
+      estimateNote: c.isStateEstimate
+        ? "No county-specific report — showing the state estimate"
+        : undefined,
+    };
+  }
+  return out;
+}
+
+export function Dashboard({ overview, states, counties }: DashboardProps) {
+  const [disease, setDisease] = useState<Disease>("flu");
+  const [respiratorySignal, setRespiratorySignal] =
+    useState<(typeof RESPIRATORY_SIGNALS)[number]>("CDC NSSP");
+  const [measlesSignal, setMeaslesSignal] =
+    useState<(typeof MEASLES_SIGNALS)[number]>("weekly");
+  const [drilldown, setDrilldown] = useState<{ fips: string; name: string } | null>(
+    null
+  );
+
+  const isMeasles = disease === "measles";
+  const canDrillDown = !isMeasles;
+
+  const activeSeries: SignalSeries = isMeasles
+    ? states.measles[measlesSignal]
+    : states[disease as RespiratoryDisease][respiratorySignal];
+
+  const stateMapData = useMemo(() => seriesToMapData(activeSeries), [activeSeries]);
+
+  const countyMapData = useMemo(() => {
+    if (isMeasles || !drilldown) return {};
+    return countySeriesToMapData(counties[disease as RespiratoryDisease]);
+  }, [isMeasles, drilldown, disease, counties]);
+
+  function handleSelectDisease(next: Disease) {
+    setDisease(next);
+    setDrilldown(null);
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <OverviewStrip
+        flu={overview.flu}
+        covid={overview.covid}
+        rsv={overview.rsv}
+        measles={overview.measles}
+      />
+
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="flex gap-1 rounded-lg border p-1" style={{ borderColor: "var(--color-border-default)" }}>
+          {(["flu", "covid", "rsv", "measles"] as Disease[]).map((d) => (
+            <button
+              key={d}
+              onClick={() => handleSelectDisease(d)}
+              className="rounded-md px-3 py-1.5 text-sm font-medium"
+              style={{
+                background: disease === d ? "var(--color-focus)" : "transparent",
+                color: disease === d ? "white" : "var(--color-text-secondary)",
+              }}
+            >
+              {DISEASE_LABEL[d]}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex gap-1 rounded-lg border p-1" style={{ borderColor: "var(--color-border-default)" }}>
+          {!isMeasles &&
+            RESPIRATORY_SIGNALS.map((s) => (
+              <button
+                key={s}
+                onClick={() => setRespiratorySignal(s)}
+                className="rounded-md px-3 py-1.5 text-sm font-medium"
+                style={{
+                  background: respiratorySignal === s ? "var(--color-bg-page)" : "transparent",
+                  color: "var(--color-text-secondary)",
+                  border:
+                    respiratorySignal === s
+                      ? "1px solid var(--color-border-default)"
+                      : "1px solid transparent",
+                }}
+              >
+                {SIGNAL_LABEL[s]}
+              </button>
+            ))}
+          {isMeasles &&
+            MEASLES_SIGNALS.map((s) => (
+              <button
+                key={s}
+                onClick={() => setMeaslesSignal(s)}
+                className="rounded-md px-3 py-1.5 text-sm font-medium"
+                style={{
+                  background: measlesSignal === s ? "var(--color-bg-page)" : "transparent",
+                  color: "var(--color-text-secondary)",
+                  border:
+                    measlesSignal === s
+                      ? "1px solid var(--color-border-default)"
+                      : "1px solid transparent",
+                }}
+              >
+                {SIGNAL_LABEL[s]}
+              </button>
+            ))}
+        </div>
+
+        <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+          Data current as of {activeSeries.asOf} &middot; generated{" "}
+          {new Date(overview.generatedAt).toLocaleString()}
+        </span>
+      </div>
+
+      {!drilldown ? (
+        <Choropleth
+          view="states"
+          data={stateMapData}
+          unit={SIGNAL_LABEL[isMeasles ? measlesSignal : respiratorySignal].includes("%")
+            ? "%"
+            : ` ${activeSeries.unit}`}
+          onSelectState={
+            canDrillDown ? (fips, name) => setDrilldown({ fips, name }) : undefined
+          }
+        />
+      ) : (
+        <div>
+          <h3 className="mb-2 text-sm font-medium" style={{ color: "var(--color-text-primary)" }}>
+            {drilldown.name} counties &middot; {DISEASE_LABEL[disease]} ED visits %
+          </h3>
+          <Choropleth
+            view="counties"
+            data={countyMapData}
+            unit="%"
+            stateFips={drilldown.fips}
+            onBack={() => setDrilldown(null)}
+          />
+        </div>
+      )}
+    </div>
+  );
+}

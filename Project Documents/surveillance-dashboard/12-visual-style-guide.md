@@ -51,30 +51,42 @@ Changes require a recorded decision, rationale, affected surfaces, and review.
 
 ### Color tokens
 
-Use semantic names so themes can change without rewriting components. Exact hex values
-to be finalized during M2 build (first UI milestone) and recorded here once chosen;
-placeholders below establish the semantic model and contrast requirement now so
-implementation isn't ad hoc.
+Sourced from the dataviz skill's validated reference palette (chosen as this project's
+palette outright, not swapped for a separate brand — appropriate for a personal,
+non-branded tool). Defined as CSS custom properties in `web/app/globals.css`.
 
-| Token | Value | Usage | Contrast requirement |
+| Token | Light | Dark | Usage | Contrast requirement |
+|---|---|---|---|---|
+| `color-bg-page` | `#f9f9f7` | `#0d0d0d` | Page background | — |
+| `color-bg-surface` | `#fcfcfb` | `#1a1a19` | Cards and panels | — |
+| `color-text-primary` | `#0b0b0b` | `#ffffff` | Primary text | WCAG AA (4.5:1) against surface |
+| `color-text-secondary` | `#52514e` | `#c3c2b7` | Secondary text | WCAG AA (4.5:1) against surface |
+| `color-text-muted` | `#898781` | `#898781` | `as_of` captions, axis labels | Muted by design; never the only carrier of meaning |
+| `color-border-default` | `#e1e0d9` | `#2c2c2a` | Dividers, gridlines | — |
+| `color-focus` | `#2a78d6` | `#3987e5` | Keyboard focus ring | Visible against both light and dark backgrounds |
+| `color-no-data` | `#e1e0d9` | `#2c2c2a` | Map fill for counties/states with no usable data | — |
+
+Status palette (fixed — never themed, same hexes in both modes), mapped 1:1 to the four
+severity levels used in the overview strip and level-based map fills:
+
+| Level | Token | Hex | Notes |
 |---|---|---|---|
-| `color-bg-page` | TBD (neutral light/dark) | Page background | — |
-| `color-bg-surface` | TBD (neutral, slightly elevated from page) | Cards and panels | — |
-| `color-text-primary` | TBD (near-black / near-white) | Primary text | WCAG AA (4.5:1) against surface |
-| `color-text-muted` | TBD (muted gray) | Secondary text, `as_of` captions | WCAG AA (4.5:1) against surface where used for meaningful text |
-| `color-action-primary` | TBD | Selectors, interactive controls | WCAG AA (4.5:1) against surface |
-| `color-border-default` | TBD (subtle neutral) | Dividers and controls | — |
-| `color-state-minimal` | TBD (calm neutral/green family) | Severity: minimal | WCAG AA against its label text |
-| `color-state-low` | TBD (green-yellow family) | Severity: low | WCAG AA against its label text |
-| `color-state-moderate` | TBD (amber family) | Severity: moderate | WCAG AA against its label text |
-| `color-state-high` | TBD (red family) | Severity: high | WCAG AA against its label text |
-| `color-state-warning` | TBD | HSA-disclosure / staleness callouts | WCAG AA against its label text |
-| `color-state-danger` | TBD | Error states | WCAG AA against its label text |
-| `color-focus` | TBD (high-contrast, distinct from action-primary) | Keyboard focus | Visible against both light and dark backgrounds |
+| Minimal | `color-state-minimal` | `#0ca30c` | |
+| Low | `color-state-low` | `#fab219` | Sub-3:1 on light surface by design — always paired with icon + text label, never color alone |
+| Moderate | `color-state-serious` | `#ec835a` | Same sub-3:1 caveat as above |
+| High | `color-state-critical` | `#d03b3b` | |
 
-Document light, dark, high-contrast, and data-visualization palettes when applicable —
-to be completed when the first screens are built (M2), since color choices should be
-validated against real map/chart data, not chosen in the abstract.
+Sequential ramp (single hue, blue, light→dark step 100→700) for choropleth magnitude
+encoding — the map's fill color is never the status palette, since the map encodes a
+continuous value, not a discrete level:
+
+`#cde2fb → #b7d3f6 → #9ec5f4 → #86b6ef → #6da7ec → #5598e7 → #3987e5 → #2a78d6 → #256abf
+→ #1c5cab → #184f95 → #104281 → #0d366b`
+
+Known limitation: the sequential ramp's dark-mode contrast has not been independently
+re-validated against the dark chart surface (only the categorical/status palettes were
+confirmed for both modes) — tracked as a follow-up, low risk since the map is a
+secondary surface, not the primary reading mode for most sessions.
 
 ### Typography
 
