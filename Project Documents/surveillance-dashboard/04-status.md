@@ -48,7 +48,7 @@
 | Confirm D-006/D-007 before scaffolding | Ben Aheto | Before M1 start | `COMPLETE` | Confirmed 2026-07-25: Next.js + DuckDB |
 | NYC DOHMH research spike (plan step 6) | Claude Code | Before any borough-blend code | `COMPLETE` | D-008, 2026-07-26 |
 | Confirm Vercel/GitHub setup before M7 deploy | Ben Aheto | Before M7 starts | `NOT STARTED` | — |
-| Export user guide + technical spec to Word (with data-flow diagrams) | Claude Code | When build is finished | `NOT STARTED` | User request, 2026-07-26 |
+| Export user guide + technical spec to Word (with data-flow diagrams) | Claude Code | When build is finished | `COMPLETE` | `09-user-guide.docx`, `10-technical-specification.docx` generated 2026-07-26, verified via QuickLook/Word rendering; source `.md` files remain the living/maintained documents, `.docx` are point-in-time exports |
 
 ## Completion summary
 
