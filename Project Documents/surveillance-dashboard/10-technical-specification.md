@@ -124,11 +124,14 @@ changes (see the Word-export note in this document's governance, if applicable).
 |---|---|---|---|---|---|
 | Data pipeline | Fetch, clean, and transform PopHIVE + NYC DOHMH data into static JSON | `web/scripts/build-data.ts`, DuckDB (D-007) | PopHIVE parquet URLs, NYC DOHMH CSV URLs | 5 static JSON files | Claude Code |
 | Choropleth map | Render state/county choropleth, tooltip, drill-down, tri-state highlight | `components/Choropleth.tsx` (d3-geo + us-atlas TopoJSON) | JSON series data | Rendered SVG map | Claude Code |
-| Overview strip | Level/trend/% of 2-year peak per disease (measles: case counts, no level) | `components/OverviewStrip.tsx` | `overview.json` | Rendered cards | Claude Code |
-| Dashboard (outbreak tracker) | Disease/signal selectors, drill-down state, tri-state toggle, vaccination panel | `components/Dashboard.tsx` | `states.json`, `counties.json`, `vaccination.json` | Rendered UI | Claude Code |
+| Overview strip | Level/trend/% of 2-year peak per disease (measles: case counts, no level); includes trend charts (E-004) | `components/OverviewStrip.tsx`, `components/TrendChart.tsx` | `overview.json` with `historicalPoints` | Rendered cards with charts | Claude Code |
+| Trend chart | 2-year line chart showing disease progression with peak reference (E-004) | `components/TrendChart.tsx` (Recharts) | `historicalPoints` array from OverviewCard | Rendered line chart | Claude Code |
+| Dashboard (outbreak tracker) | Disease/signal selectors (E-006: 10 signals), drill-down state, tri-state toggle, vaccination panel (E-012: 6 vaccine types) | `components/Dashboard.tsx` | `states.json`, `counties.json`, `vaccination.json` | Rendered UI | Claude Code |
+| CDC Dashboard tabs | Data Explorer, State Assessment, Disease Progression for CDC health data analysis | `components/CDCDataExplorer.tsx`, `StateAssessment.tsx`, `DiseaseProgression.tsx` | CDC API responses | Rendered analysis UI | Claude Code |
 | Chronic-disease panel | Separate tab, own indicator selector | `components/ChronicDiseasePanel.tsx` | `chronic.json` | Rendered UI | Claude Code |
 | NYC borough blend | Fetch + parse NYC DOHMH CSVs, merge into county data with fallback | `lib/nycDohmh.ts` | NYC DOHMH CSV URLs | `BoroughDatum[]` per disease | Claude Code |
-| Scheduled rebuild | Trigger periodic redeploys | Vercel Cron + deploy hook | Schedule config | Redeploy trigger | Not yet built (M7) |
+| County data API (E-007) | Lazy-load filtered county data by state FIPS | `/app/api/counties/route.ts` | State FIPS query parameter | County data for selected state (JSON) | Claude Code |
+| Scheduled rebuild | Trigger periodic redeploys | Vercel Cron + deploy hook | Schedule config | Redeploy trigger | Implemented (M7) |
 
 ## Folder structure
 
@@ -140,23 +143,30 @@ Public Health Tracker/            # git repo root
       page.tsx                    # Server Component: imports JSON, renders Dashboard
       layout.tsx
       globals.css                 # Design tokens (see 12-visual-style-guide.md)
+      api/
+        counties/route.ts         # Lazy-load counties by state FIPS (E-007)
     components/
-      Dashboard.tsx                # Top-level client component, all interactive state
+      Dashboard.tsx                # Top-level client component, all interactive state (includes CDC Dashboard tab)
       Choropleth.tsx                # Map rendering, tooltip, legend
-      OverviewStrip.tsx             # 4 status cards
+      OverviewStrip.tsx             # 4 status cards with trend charts (E-004)
+      TrendChart.tsx                # 2-year historical line chart (E-004)
       ChronicDiseasePanel.tsx       # Chronic-disease tab
+      CDCDataExplorer.tsx           # CDC Dashboard: Data Explorer tab
+      StateAssessment.tsx           # CDC Dashboard: State Assessment tab
+      DiseaseProgression.tsx        # CDC Dashboard: Disease Progression tab
     lib/
       pophive/
         duckdb.ts                  # DuckDB query helper
         fips.ts                    # FIPS padding/exclusion helpers
         states.ts                  # US state FIPS/name/abbr crosswalk
-        types.ts                   # Shared data types
+        types.ts                   # Shared data types (includes historicalPoints in OverviewCard)
         bands.ts                   # Our own level/trend heuristics (documented as approximate)
-        overallTrends.ts            # flu/covid/rsv overview + state series
-        measles.ts                  # measles weekly/cumulative series
-        countyEdVisits.ts           # county-level ED-visit series
-        vaccination.ts              # MMR coverage (HealthMap + NIS)
-        chronic.ts                  # diabetes/obesity/opioid-overdose
+        overallTrends.ts           # flu/covid/rsv overview + state series (builds historicalPoints)
+        signals.ts                 # Signal configuration (E-006): 10 signals grouped by type
+        measles.ts                 # measles weekly/cumulative series
+        countyEdVisits.ts          # county-level ED-visit series
+        vaccination.ts             # Childhood vaccine coverage (E-012): MMR, DTaP, Polio, etc.
+        chronic.ts                 # diabetes/obesity/opioid-overdose
       nycDohmh.ts                  # NYC borough CSV fetch/parse
       topology.ts                  # us-atlas TopoJSON -> GeoJSON helpers
     scripts/
@@ -173,7 +183,8 @@ Public Health Tracker/            # git repo root
 | `lib/pophive/overallTrends.ts` | Build national overview cards + multi-signal state series for flu/covid/rsv | `buildOverviewCard(disease)`, `buildStateSignalSeries(disease, signal)` | `duckdb.ts`, `states.ts`, `bands.ts` |
 | `lib/pophive/measles.ts` | Measles weekly/cumulative state series + national overview card | `buildMeaslesOverviewCard()`, `buildMeaslesWeeklySeries()`, `buildMeaslesCumulativeSeries()` | `duckdb.ts`, `states.ts`, `bands.ts` |
 | `lib/pophive/countyEdVisits.ts` | County-level ED-visit series with state-estimate fallback | `buildCountySeries(disease)` | `duckdb.ts`, `fips.ts` |
-| `lib/pophive/vaccination.ts` | MMR coverage from two independent sources | `buildMmrHealthmapSeries()`, `buildMmrNisSeries()` | `duckdb.ts`, `states.ts` |
+| `lib/pophive/vaccination.ts` | Childhood vaccine coverage (E-012): MMR, DTaP, Polio, Hepatitis B, Varicella, Combined 7-series | `buildMmrHealthmapSeries()`, `buildMmrNisSeries()`, `buildDtapNisSeries()`, `buildPolioNisSeries()`, `buildHepbNisSeries()`, `buildVaricellaVaxNisSeries()`, `buildCombined7SeriesNisSeries()` | `duckdb.ts`, `states.ts` |
+| `lib/pophive/signals.ts` | Signal configuration (E-006): 10 signals grouped by type (syndromic/medical/behavioral) | `AVAILABLE_SIGNALS`, `SIGNAL_GROUPS`, `UNIT_BY_SOURCE` | None (static config) |
 | `lib/pophive/chronic.ts` | Diabetes/obesity/opioid-overdose state series | `buildDiabetesSeries()`, `buildObesitySeries()`, `buildOpioidOverdoseSeries()` | `duckdb.ts`, `states.ts` |
 | `lib/nycDohmh.ts` | Fetch + parse NYC DOHMH's borough-level CSVs | `fetchAllBoroughData()` | Native `fetch` |
 | `lib/topology.ts` | Convert `us-atlas` TopoJSON to GeoJSON feature collections | `usStates`, `usCounties`, `countiesForStates(fipsList)` | `topojson-client`, `us-atlas` |

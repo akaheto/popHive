@@ -1,24 +1,21 @@
 # Status and Accountability
 
-- Overall status: `COMPLETE`
+- Overall status: `COMPLETE` (v1 feature build + 4 post-launch enhancements)
 - Owner: Ben Aheto
 - Last updated: 2026-08-02
-- Current gate: Gate 5 — Close (all milestones M1-M8 complete; all ACs verified; QA passed; deployment live)
+- Current gate: Gate 5 — Close (v1 M1-M8 complete; post-M8 enhancements E-004/E-006/E-007/E-012 delivered)
 
 ## Progress
 
-- Completed: Gate 0-3 planning; M1-M6 (full v1 feature build, browser-verified); M7
-  deployment + visual/accessibility pass; M8 (formal AC verification, QA sign-off, retrospective).
+- Completed: Gate 0-3 planning; M1-M6 (full v1 feature build, browser-verified); M7 deployment + visual/accessibility pass; M8 (formal AC verification, QA sign-off, retrospective).
 - Completed 2026-07-26: M7 visual/accessibility pass. Delivered E-008 (theme-aware dark-mode choropleth ramp) and E-010 (keyboard-accessible "Jump to state" equivalent). Verified WCAG AA contrast, no horizontal overflow at narrowest reachable viewport (606px), visible keyboard focus states throughout. Found pre-existing gap E-013 (control heights 30-34px vs. 44px target) — deferred to future enhancement. Two manual checks remained pending: (1) dark-mode rendering under real `prefers-color-scheme: dark`; (2) true phone-width and 200% zoom.
-- Completed 2026-08-02: M8 close-out. Formal AC verification (10/10 ACs `PASS`); QA sign-off; retrospective complete. Manual verification on actual iPhone 14 Pro confirmed:
-  - Light and dark mode both render correctly
-  - Responsive layout works at 390px (iPhone 14 Pro actual), 375px, 640px (200% zoom equivalent), 1280px desktop
-  - Map drill-down functional on mobile
-  - All controls accessible and readable across viewports
-  - Choropleth color ramps display correctly in both themes
-  - Text contrast meets WCAG AA in both themes
-  - No horizontal overflow at any tested width
-- Deployment live at https://web-six-sage-30.vercel.app; daily scheduled rebuild active (Vercel Cron, 0 12 * * *).
+- Completed 2026-08-02: M8 close-out. Formal AC verification (10/10 ACs `PASS`); QA sign-off; retrospective complete. Manual verification on actual iPhone 14 Pro confirmed responsive design and theme rendering.
+- Completed 2026-08-02: Post-v1 enhancements delivered:
+  - **E-004** — Historical trend charts in overview cards (2-year line chart with peak reference)
+  - **E-006** — 10 disease signals (syndromic/medical/behavioral grouped selector)
+  - **E-007** — Lazy-load county JSON via `/api/counties` (saves ~1.2MB from initial bundle)
+  - **E-012** — Vaccination panel with 6 vaccine types (MMR, DTaP, Polio, Hep B, Varicella, Combined 7)
+- Deployment live at https://public-health-dashboard-lt5tiroht-ben-a.vercel.app; daily scheduled rebuild active (Vercel Cron, 0 12 * * *). CDC Dashboard integrated as main tab alongside Outbreak Tracker and Chronic Disease tabs (deployment in progress).
 
 ## Current milestone
 
