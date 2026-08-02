@@ -140,19 +140,27 @@ async function main() {
   );
 
   console.log("\nBuilding chronic-disease/behavioral-health series...");
-  const [diabetes, obesity, opioidOverdose] = await Promise.all([
-    buildDiabetesSeries(),
-    buildObesitySeries(),
-    buildOpioidOverdoseSeries(),
-  ]);
-  const chronic = { diabetes, obesity, opioidOverdose };
-  console.log(
-    `  Diabetes: ${diabetes.states.length} states, as of ${diabetes.asOf}`
-  );
-  console.log(`  Obesity: ${obesity.states.length} states, as of ${obesity.asOf}`);
-  console.log(
-    `  Opioid overdose: ${opioidOverdose.states.length} states, as of ${opioidOverdose.asOf}`
-  );
+  let chronic = { diabetes: null, obesity: null, opioidOverdose: null } as Record<string, unknown>;
+  try {
+    const [diabetes, obesity, opioidOverdose] = await Promise.all([
+      buildDiabetesSeries(),
+      buildObesitySeries(),
+      buildOpioidOverdoseSeries(),
+    ]);
+    chronic = { diabetes, obesity, opioidOverdose };
+    console.log(
+      `  Diabetes: ${diabetes.states.length} states, as of ${diabetes.asOf}`
+    );
+    console.log(`  Obesity: ${obesity.states.length} states, as of ${obesity.asOf}`);
+    console.log(
+      `  Opioid overdose: ${opioidOverdose.states.length} states, as of ${opioidOverdose.asOf}`
+    );
+  } catch (err) {
+    console.warn(
+      "  Chronic-disease data fetch failed — tab will show data unavailable:",
+      err
+    );
+  }
   await writeFile(path.join(OUT_DIR, "chronic.json"), JSON.stringify(chronic, null, 2));
 
   console.log(`\nDone in ${((Date.now() - startedAt) / 1000).toFixed(1)}s`);
