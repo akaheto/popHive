@@ -155,18 +155,38 @@ export function Dashboard({
         </button>
         <button
           onClick={() => setMainTab("chronic")}
-          className="rounded-md px-3 py-1.5 text-sm font-medium"
+          disabled={!chronic.diabetes}
+          className="rounded-md px-3 py-1.5 text-sm font-medium disabled:opacity-40"
           style={{
             background: mainTab === "chronic" ? "var(--color-focus)" : "transparent",
             color: mainTab === "chronic" ? "white" : "var(--color-text-secondary)",
           }}
+          title={!chronic.diabetes ? "Data unavailable" : undefined}
         >
           Chronic Disease &amp; Behavioral Health
         </button>
       </div>
 
       {mainTab === "chronic" ? (
-        <ChronicDiseasePanel {...chronic} />
+        chronic.diabetes ? (
+          <ChronicDiseasePanel {...(chronic as Required<typeof chronic>)} />
+        ) : (
+          <div
+            className="rounded-lg border p-6 text-center"
+            style={{
+              borderColor: "var(--color-border-default)",
+              background: "var(--color-bg-surface)",
+            }}
+          >
+            <h3 className="font-semibold" style={{ color: "var(--color-text-primary)" }}>
+              Data Unavailable
+            </h3>
+            <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+              Chronic disease and behavioral health data is currently unavailable. Please try
+              again later.
+            </p>
+          </div>
+        )
       ) : (
         <>
       <OverviewStrip
