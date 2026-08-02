@@ -41,7 +41,7 @@ function Trend({ trend }: { trend: Trend }) {
 function Card({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="flex-1 min-w-[220px] rounded-lg border p-4"
+      className="flex-1 min-w-[160px] rounded-lg border p-4"
       style={{
         background: "var(--color-bg-surface)",
         borderColor: "var(--color-border-default)",

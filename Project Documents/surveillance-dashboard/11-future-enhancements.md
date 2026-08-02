@@ -29,6 +29,7 @@ Reassess it during planning and after every milestone.
 | E-010 | Keyboard-operable equivalent for map state-click drill-down | Currently mouse/touch-only; the style guide requires a keyboard equivalent for every interactive element | Medium (accessibility gap) | Low-medium (e.g. a focusable state list alongside the map) | M2 build | Style guide accessibility standard, not yet implemented | `DELIVERED` | M7 visual pass, 2026-07-26 |
 | E-011 | County-level MMR coverage (`wapo_vax_counties.parquet`) | Brief specifically asks for MMR at county level; would let the vaccination panel drill down like the disease maps do | Medium | Medium (needs clarification first, not just wiring) | M5 build | Discovered during M5: the file's `wapo_county_vax_rate` didn't reconcile with its own sibling file's exemption-rate columns at the school level (e.g. a school reading 1% overall rate but 0% exemptions) — deferred rather than risk a mislabeled metric | `CANDIDATE` | Unscheduled — needs schema clarification (check PopHIVE docs/maintainers or the original WaPo methodology) before building |
 | E-012 | Surface additional childhood vaccines beyond MMR (DTaP, polio, HepA/B, varicella, Combined 7 Series — all present in `nis_overall.parquet`'s `vaccine` column) | Brief lists these as in-scope vaccination topics; same pipeline pattern as MMR, just needs a vaccine selector | Low-medium | Low (data already available, same file just different filter value) | M5 build | Brief section 3 topic list | `CANDIDATE` | Unscheduled |
+| E-013 | Raise interactive control heights (tabs, toggles, the state-jump select) to the style guide's 44x44px touch-target minimum | Measured at 30-34px tall in the current build; style guide already flags this as low-priority since the tool is desktop/laptop-first, but it's not met as stated | Low | Low-medium (shared Tailwind classes across several components — a visible spacing change, not a one-file fix) | M7 visual/accessibility pass | Discovered during M7 QA checklist pass, 2026-07-26 | `CANDIDATE` | Unscheduled |
 
 ## Enhancement details
 
@@ -87,4 +88,4 @@ Reassess it during planning and after every milestone.
 | 2026-07-25 | Claude Code | E-001 through E-005 | — | — |
 | 2026-07-26 | Claude Code | E-006 through E-010 (discovered during M2 build) | — | — |
 | 2026-07-26 | Claude Code | E-011, E-012 (discovered during M5 build) | — | — |
-| 2026-07-26 | Claude Code | — | — | E-008, E-010 (M7 visual/accessibility pass) |
+| 2026-07-26 | Claude Code | E-013 (discovered during M7 QA pass) | — | E-008, E-010 (M7 visual/accessibility pass) |

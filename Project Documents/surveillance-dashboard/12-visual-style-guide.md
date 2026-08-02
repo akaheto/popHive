@@ -238,15 +238,51 @@ and narrow-screen states once each screen is built.
 
 ## Design QA checklist
 
-- [ ] Approved tokens are used; no unexplained one-off values exist.
-- [ ] Components match approved variants and state behavior.
-- [ ] Visual hierarchy is consistent.
-- [ ] Responsive behavior matches the documented rules.
-- [ ] Keyboard focus and interaction states are visible.
-- [ ] Contrast and text scaling meet the stated standard.
-- [ ] Loading, empty, error, and success states are designed.
-- [ ] Content follows voice, labeling, and formatting rules.
-- [ ] Intentional exceptions are documented and approved.
+Pass run 2026-07-26 (M7). See `04-status.md` for the session note and open items.
+
+- [x] Approved tokens are used; no unexplained one-off values exist. Verified by
+      grepping `app`/`components`/`lib`/`scripts` for hex literals outside
+      `globals.css` and the documented choropleth ramp — none found.
+- [x] Components match approved variants and state behavior, per the Component
+      standards table above.
+- [x] Visual hierarchy is consistent (overview strip → tabs → map → legend, in
+      that order, on every tab/panel) — confirmed by screenshot across the
+      Outbreak Tracker, Tri-State + NYC, and Chronic Disease tabs.
+- [~] Responsive behavior matches the documented rules. Confirmed no horizontal
+      overflow and clean control wrapping down to the narrowest viewport this
+      session's tooling could reach (~606px CSS width — a hard floor in this
+      browser-automation environment, not a floor in the app). True phone-width
+      (~320-390px) and true 200% browser zoom were not exercised; recommend a
+      manual check on an actual phone or with real DevTools device emulation.
+- [x] Keyboard focus and interaction states are visible. Confirmed by screenshot
+      (visible focus ring while tabbing through the disease-tab control) and by
+      code review (no `outline-none`/`tabIndex={-1}` anywhere suppressing it);
+      `color-focus` contrast checked at 4.19:1 (light) / 5.34:1 (dark) against
+      `color-bg-page`, both above the 3:1 non-text minimum.
+- [~] Contrast and text scaling meet the stated standard. All text-token pairs
+      checked programmatically (WCAG relative-luminance formula) — every pair is
+      7.7:1 or higher in both themes, well above the 4.5:1 AA minimum. Text
+      *scaling* (200% zoom) itself was not exercised this session — same tooling
+      limitation as above.
+- [x] Loading, empty, error, and success states are designed, within this site's
+      actual architecture: data is static-generated (no client-side fetch, so no
+      loading spinner is needed — documented in Interaction and motion above),
+      "no data" cells get the dedicated `color-no-data` fill + legend entry, and
+      staleness is disclosed via visible `as_of`/`generated` timestamps plus the
+      existing HSA-level and stale-MMR banners (shipped in M2-M5, browser-
+      verified at the time).
+- [x] Content follows voice, labeling, and formatting rules — spot-checked
+      against the live site (sentence case, plain factual tone, `as_of` dates
+      shown, no editorializing).
+- [x] Intentional exceptions are documented and approved. None currently exist;
+      the Exceptions table below is correctly empty.
+
+Gap found (not a regression from M7's changes, pre-existing): interactive
+control heights measured 30-34px, short of the 44x44px touch-target minimum
+stated above. Tracked as E-013 in `11-future-enhancements.md` rather than fixed
+inline, since it's a shared-class change across most components (a visible
+spacing change) and the style guide already treats touch targets as lower
+priority for this desktop/laptop-first tool.
 
 ## Exceptions
 
