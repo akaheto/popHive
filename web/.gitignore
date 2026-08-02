@@ -36,6 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# generated data (too large for deployment, regenerated during build)
+/data/generated/
+/data/archive/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

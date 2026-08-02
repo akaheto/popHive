@@ -1,8 +1,12 @@
 // Build-time data pipeline: fetches PopHIVE parquet bundles via DuckDB,
 // applies the project's data-quality rules, and writes static JSON consumed
 // by the site. Run via `npm run build:data` (also wired as `prebuild`).
+import dotenv from "dotenv";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+
+// Load environment variables from .env.local
+dotenv.config({ path: ".env.local" });
 import {
   buildOverviewCard,
   buildStateSignalSeries,
@@ -22,6 +26,7 @@ import {
   buildFirearmMortalitySeries,
 } from "../lib/pophive/chronic";
 import { fetchAllBoroughData, type RespiratoryDisease as NycDisease } from "../lib/nycDohmh";
+import { fetchAllTier1Datasets, fetchAllBacklogDatasets } from "../lib/cdc";
 
 const OUT_DIR = path.join(__dirname, "..", "data", "generated");
 
@@ -141,19 +146,37 @@ async function main() {
   );
 
   console.log("\nBuilding chronic-disease/behavioral-health series...");
-  let chronic = { diabetes: null, obesity: null, opioidOverdose: null, firearmMortality: null } as Record<string, unknown>;
+  let chronic = {
+    diabetes: null,
+    obesity: null,
+    opioidOverdose: null,
+    firearmMortality: null,
+    cdcIndicators: null,
+  } as Record<string, unknown>;
+
   try {
-    const [diabetes, obesity, opioidOverdose, firearmMortality] = await Promise.all([
-      buildDiabetesSeries(),
-      buildObesitySeries(),
+    // Use PopHIVE for chronic disease (CDC CDI accessible via Tier 1 now)
+    let diabetes = null;
+    let obesity = null;
+    try {
+      diabetes = await buildDiabetesSeries();
+      obesity = await buildObesitySeries();
+    } catch (err) {
+      console.warn("  PopHIVE chronic disease fetch failed:", err);
+    }
+
+    const [opioidOverdose, firearmMortality] = await Promise.all([
       buildOpioidOverdoseSeries(),
       buildFirearmMortalitySeries(),
     ]);
+
     chronic = { diabetes, obesity, opioidOverdose, firearmMortality };
-    console.log(
-      `  Diabetes: ${diabetes.states.length} states, as of ${diabetes.asOf}`
-    );
-    console.log(`  Obesity: ${obesity.states.length} states, as of ${obesity.asOf}`);
+    if (diabetes) {
+      console.log(`  Diabetes: ${diabetes.states.length} states, as of ${diabetes.asOf}`);
+    }
+    if (obesity) {
+      console.log(`  Obesity: ${obesity.states.length} states, as of ${obesity.asOf}`);
+    }
     console.log(
       `  Opioid overdose: ${opioidOverdose.states.length} states, as of ${opioidOverdose.asOf}`
     );
@@ -171,6 +194,45 @@ async function main() {
     );
   }
   await writeFile(path.join(OUT_DIR, "chronic.json"), JSON.stringify(chronic, null, 2));
+
+  console.log("\nFetching CDC Tier 1 datasets...");
+  const tier1Results = await fetchAllTier1Datasets(30); // Last 30 days
+  console.log(`Fetched ${tier1Results.results.filter((r) => r.success).length} / ${tier1Results.results.length} CDC datasets`);
+
+  // Write Tier 1 data to file
+  const tier1Summary = {
+    fetchedAt: new Date().toISOString(),
+    results: tier1Results.results,
+    datasetCount: tier1Results.results.length,
+    successCount: tier1Results.results.filter((r) => r.success).length,
+  };
+  await writeFile(path.join(OUT_DIR, "cdc-tier1-summary.json"), JSON.stringify(tier1Summary, null, 2));
+
+  // Write individual dataset files
+  for (const [key, data] of Object.entries(tier1Results.data)) {
+    const filepath = path.join(OUT_DIR, `cdc-${key}.json`);
+    await writeFile(filepath, JSON.stringify(data, null, 2));
+    console.log(`  Wrote cdc-${key}.json (${data.length} rows)`);
+  }
+
+  console.log("\nFetching CDC Backlog datasets...");
+  const backlogResults = await fetchAllBacklogDatasets(30);
+  console.log(`Fetched ${backlogResults.results.filter((r) => r.success).length} / ${backlogResults.results.length} backlog datasets`);
+
+  // Write backlog data
+  const backlogSummary = {
+    fetchedAt: new Date().toISOString(),
+    results: backlogResults.results,
+    datasetCount: backlogResults.results.length,
+    successCount: backlogResults.results.filter((r) => r.success).length,
+  };
+  await writeFile(path.join(OUT_DIR, "cdc-backlog-summary.json"), JSON.stringify(backlogSummary, null, 2));
+
+  for (const [id, data] of Object.entries(backlogResults.data)) {
+    const filepath = path.join(OUT_DIR, `cdc-backlog-${id}.json`);
+    await writeFile(filepath, JSON.stringify(data, null, 2));
+    console.log(`  Wrote cdc-backlog-${id}.json (${data.length} rows)`);
+  }
 
   console.log(`\nDone in ${((Date.now() - startedAt) / 1000).toFixed(1)}s`);
   process.exit(0);

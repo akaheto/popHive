@@ -1,4 +1,5 @@
 import { Dashboard, type DashboardProps } from "@/components/Dashboard";
+import CDCDashboard from "@/components/CDCDashboard";
 import overviewJson from "@/data/generated/overview.json";
 import statesJson from "@/data/generated/states.json";
 import countiesJson from "@/data/generated/counties.json";
@@ -55,6 +56,8 @@ export default function Home() {
           vaccination={vaccination}
           chronic={chronic}
         />
+
+        <CDCDashboard />
       </main>
     </div>
   );

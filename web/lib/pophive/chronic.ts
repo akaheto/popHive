@@ -1,15 +1,13 @@
 import { queryParquet } from "./duckdb";
 import { STATE_FIPS_BY_NAME } from "./states";
 import type { IndicatorSeries, StateDatum } from "./types";
+import { buildCDIIndicator, buildMultipleCDIIndicators, CDI_INDICATORS } from "../cdc";
+import type { CDIIndicatorId } from "../cdc";
 
-// Chronic disease / behavioral health: a deliberately smaller slice than the
-// brief's full topic list (diabetes, obesity, cancer screenings,
-// cardiovascular/depression/diabetes screening, wellness visits, adult
-// vaccination, anxiety, depression, adhd, opioid use disorder, injury/
-// firearm deaths). Diabetes, obesity, and opioid overdose were picked as a
-// representative first slice; the rest are tracked in
-// 11-future-enhancements.md rather than guessed at without their own schema
-// checks.
+// Chronic disease / behavioral health data sources
+// PRIMARY: CDC Chronic Disease Indicators (CDI) - 125+ indicators from BRFSS
+// SECONDARY: PopHIVE Epic Cosmos claims data (for diabetes & obesity)
+// TERTIARY: CDC/NCHS for opioid overdose mortality
 
 const PREVALENCE_BUNDLE =
   "bundle_chronic_diseases/dist/prevalence_by_geography_and_year_and_source.parquet";
@@ -166,4 +164,69 @@ export async function buildFirearmMortalitySeries(): Promise<IndicatorSeries | n
     console.warn("  Firearm mortality fetch failed:", err);
     return null;
   }
+}
+
+// CDC Chronic Disease Indicators (CDI) builders
+// These use CDC's official BRFSS data via the CDI API
+
+export async function buildCDCDiabetesSeries(): Promise<IndicatorSeries | null> {
+  // CDC Chronic Disease Indicators - Diabetes prevalence
+  // Source: CDC CDI (BRFSS) - self-reported diagnosed diabetes among adults
+  const result = await buildCDIIndicator("diabetes");
+  return result;
+}
+
+export async function buildCDCHeartDiseaseSeries(): Promise<IndicatorSeries | null> {
+  // CDC Chronic Disease Indicators - Heart Disease prevalence
+  // Source: CDC CDI (BRFSS)
+  const result = await buildCDIIndicator("heart_disease");
+  return result;
+}
+
+export async function buildCDCStrokeSeries(): Promise<IndicatorSeries | null> {
+  // CDC Chronic Disease Indicators - Stroke prevalence
+  // Source: CDC CDI (BRFSS)
+  const result = await buildCDIIndicator("stroke");
+  return result;
+}
+
+export async function buildCDCAsthmaSeries(): Promise<IndicatorSeries | null> {
+  // CDC Chronic Disease Indicators - Asthma prevalence
+  // Source: CDC CDI (BRFSS)
+  const result = await buildCDIIndicator("asthma");
+  return result;
+}
+
+export async function buildCDCCOPDSeries(): Promise<IndicatorSeries | null> {
+  // CDC Chronic Disease Indicators - COPD prevalence
+  // Source: CDC CDI (BRFSS)
+  const result = await buildCDIIndicator("copd");
+  return result;
+}
+
+export async function buildCDCHypertensionSeries(): Promise<IndicatorSeries | null> {
+  // CDC Chronic Disease Indicators - Hypertension prevalence
+  // Source: CDC CDI (BRFSS)
+  const result = await buildCDIIndicator("hypertension");
+  return result;
+}
+
+export async function buildAllCDCIndicators(): Promise<
+  Record<CDIIndicatorId, IndicatorSeries | null>
+> {
+  // Fetch all available CDC CDI indicators at once
+  const indicatorIds: CDIIndicatorId[] = [
+    "diabetes",
+    "heart_disease",
+    "stroke",
+    "asthma",
+    "copd",
+    "hypertension",
+    "arthritis",
+    "high_cholesterol",
+    "obesity",
+    "depression",
+  ];
+
+  return buildMultipleCDIIndicators(indicatorIds);
 }
