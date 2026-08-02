@@ -36,8 +36,8 @@ yarn-error.log*
 # vercel
 .vercel
 
-# generated data (too large for deployment, regenerated during build)
-/data/generated/
+# generated data (large CDC raw files ignored, processed files committed)
+/data/generated/cdc-*.json
 /data/archive/
 
 # typescript
