@@ -38,12 +38,11 @@ export default function Home() {
     <div className="min-h-full" style={{ background: "var(--color-bg-page)" }}>
       <main className="mx-auto max-w-6xl px-6 py-8">
         <header className="mb-4 pb-3" style={{ borderBottom: "1px solid var(--color-border-default)" }}>
-          <h1 className="text-lg font-semibold truncate" style={{ color: "var(--color-text-primary)" }}>
-            Public Health Surv...
+          <h1 className="text-base font-semibold truncate" style={{ color: "var(--color-text-primary)" }}>
+            Public Health Surveillance Dashboard
           </h1>
-          <p className="mt-1 hidden text-sm sm:block" style={{ color: "var(--color-text-secondary)" }}>
-            Current US disease activity, sourced from PopHIVE (Yale School of Public
-            Health). Personal reference — not a clinical or outbreak-classification tool.
+          <p className="mt-1 text-xs leading-tight" style={{ color: "var(--color-text-secondary)" }}>
+            Current US disease activity from PopHIVE. Personal reference — not a clinical tool.
           </p>
           <p className="text-xs font-medium" style={{ color: "var(--color-text-secondary)" }}>
             Last updated: <span style={{ color: "var(--color-text-primary)" }}>{latestDataDate}</span>
