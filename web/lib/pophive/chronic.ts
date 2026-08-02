@@ -140,7 +140,8 @@ export async function buildFirearmMortalitySeries(): Promise<IndicatorSeries | n
     const states: StateDatum[] = [];
 
     for (const r of rows) {
-      if (r.geography === "United States" || r.year !== maxYear) continue;
+      if (r.geography === "United States" || r.year !== maxYear || r.rate_deaths_firearm == null)
+        continue;
       const fips = STATE_FIPS_BY_NAME[r.geography];
       if (!fips) continue;
       states.push({

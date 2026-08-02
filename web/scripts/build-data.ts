@@ -157,9 +157,13 @@ async function main() {
     console.log(
       `  Opioid overdose: ${opioidOverdose.states.length} states, as of ${opioidOverdose.asOf}`
     );
-    console.log(
-      `  Firearm mortality: ${firearmMortality.states.length} states, as of ${firearmMortality.asOf}`
-    );
+    if (firearmMortality) {
+      console.log(
+        `  Firearm mortality: ${firearmMortality.states.length} states, as of ${firearmMortality.asOf}`
+      );
+    } else {
+      console.log(`  Firearm mortality: unavailable`);
+    }
   } catch (err) {
     console.warn(
       "  Chronic-disease data fetch failed — tab will show data unavailable:",
