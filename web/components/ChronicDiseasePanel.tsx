@@ -4,18 +4,20 @@ import { useMemo, useState } from "react";
 import { Choropleth, type MapDatum } from "./Choropleth";
 import type { IndicatorSeries, StateDatum } from "@/lib/pophive/types";
 
-type Indicator = "diabetes" | "obesity" | "opioidOverdose";
+type Indicator = "diabetes" | "obesity" | "opioidOverdose" | "firearmMortality";
 
 const INDICATOR_LABEL: Record<Indicator, string> = {
   diabetes: "Diabetes",
   obesity: "Obesity",
-  opioidOverdose: "Opioid overdose deaths",
+  opioidOverdose: "Opioid overdose",
+  firearmMortality: "Firearm mortality",
 };
 
 export interface ChronicDiseasePanelProps {
-  diabetes: IndicatorSeries;
-  obesity: IndicatorSeries;
-  opioidOverdose: IndicatorSeries;
+  diabetes: IndicatorSeries | null;
+  obesity: IndicatorSeries | null;
+  opioidOverdose: IndicatorSeries | null;
+  firearmMortality?: IndicatorSeries | null;
 }
 
 function toMapData(states: StateDatum[]): Record<string, MapDatum> {
@@ -30,10 +32,48 @@ export function ChronicDiseasePanel({
   diabetes,
   obesity,
   opioidOverdose,
+  firearmMortality,
 }: ChronicDiseasePanelProps) {
-  const [indicator, setIndicator] = useState<Indicator>("diabetes");
+  // Find first available indicator
+  const availableIndicators: Indicator[] = (
+    [
+      ["diabetes", diabetes],
+      ["obesity", obesity],
+      ["opioidOverdose", opioidOverdose],
+      ["firearmMortality", firearmMortality],
+    ] as const
+  )
+    .filter(([_, data]) => data != null)
+    .map(([key]) => key as Indicator);
 
-  const series: IndicatorSeries = { diabetes, obesity, opioidOverdose }[indicator];
+  const [indicator, setIndicator] = useState<Indicator>(availableIndicators[0] || "diabetes");
+
+  const series = {
+    diabetes,
+    obesity,
+    opioidOverdose,
+    firearmMortality,
+  }[indicator];
+
+  if (!series) {
+    return (
+      <div
+        className="rounded-lg border p-6 text-center"
+        style={{
+          borderColor: "var(--color-border-default)",
+          background: "var(--color-bg-surface)",
+        }}
+      >
+        <h3 className="font-semibold" style={{ color: "var(--color-text-primary)" }}>
+          Data Unavailable
+        </h3>
+        <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+          Chronic disease indicators are currently unavailable. Please try again later.
+        </p>
+      </div>
+    );
+  }
+
   const mapData = useMemo(() => toMapData(series.states), [series]);
   const unit = series.unit.includes("%") ? "%" : ` ${series.unit}`;
 
@@ -50,8 +90,8 @@ export function ChronicDiseasePanel({
         </p>
       </div>
 
-      <div className="flex gap-1 rounded-lg border p-1 self-start" style={{ borderColor: "var(--color-border-default)" }}>
-        {(Object.keys(INDICATOR_LABEL) as Indicator[]).map((i) => (
+      <div className="flex gap-1 rounded-lg border p-1 self-start flex-wrap" style={{ borderColor: "var(--color-border-default)" }}>
+        {availableIndicators.map((i) => (
           <button
             key={i}
             onClick={() => setIndicator(i)}

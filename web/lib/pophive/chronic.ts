@@ -13,7 +13,8 @@ import type { IndicatorSeries, StateDatum } from "./types";
 
 const PREVALENCE_BUNDLE =
   "bundle_chronic_diseases/dist/prevalence_by_geography_and_year_and_source.parquet";
-const OVERDOSE_BUNDLE = "bundle_chronic_diseases/dist/overdose_deaths_state.parquet";
+const OVERDOSE_BUNDLE = "bundle_injury_overdose/dist/overdose_deaths_state.parquet";
+const FIREARMS_BUNDLE = "bundle_injury_overdose/dist/firearms_geography_source.parquet";
 
 interface PrevalenceRow {
   geography: string;
@@ -26,6 +27,12 @@ interface OverdoseRow {
   geography: string;
   time: string;
   rate_deaths_overdose: number | null;
+}
+
+interface FirearmsRow {
+  geography: string;
+  year: number;
+  rate_deaths_firearm: number | null;
 }
 
 async function buildPrevalenceSeries(
@@ -114,4 +121,48 @@ export async function buildOpioidOverdoseSeries(): Promise<IndicatorSeries> {
     asOf: maxAsOf,
     states,
   };
+}
+
+export async function buildFirearmMortalitySeries(): Promise<IndicatorSeries | null> {
+  // Firearm-related mortality (homicide, suicide, accidents) by state
+  // Schema: https://github.com/PopHIVE/Ingest/tree/main/data/bundle_injury_overdose
+  try {
+    const rows = await queryParquet<FirearmsRow>(FIREARMS_BUNDLE, (url) =>
+      `SELECT geography, year, rate_deaths_firearm
+       FROM read_parquet('${url}')
+       WHERE year IS NOT NULL AND rate_deaths_firearm IS NOT NULL
+       ORDER BY geography, year DESC`
+    );
+
+    if (rows.length === 0) return null;
+
+    const maxYear = Math.max(...rows.map((r) => r.year));
+    const states: StateDatum[] = [];
+
+    for (const r of rows) {
+      if (r.geography === "United States" || r.year !== maxYear) continue;
+      const fips = STATE_FIPS_BY_NAME[r.geography];
+      if (!fips) continue;
+      states.push({
+        stateFips: fips,
+        stateName: r.geography,
+        value: r.rate_deaths_firearm,
+        asOf: String(r.year),
+      });
+    }
+
+    if (states.length === 0) return null;
+
+    return {
+      topic: "firearm_mortality",
+      signal: "firearm_mortality",
+      source: "CDC/NCHS",
+      unit: "deaths per 100k (firearms)",
+      asOf: String(maxYear),
+      states,
+    };
+  } catch (err) {
+    console.warn("  Firearm mortality fetch failed:", err);
+    return null;
+  }
 }

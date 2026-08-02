@@ -19,6 +19,7 @@ import {
   buildDiabetesSeries,
   buildObesitySeries,
   buildOpioidOverdoseSeries,
+  buildFirearmMortalitySeries,
 } from "../lib/pophive/chronic";
 import { fetchAllBoroughData, type RespiratoryDisease as NycDisease } from "../lib/nycDohmh";
 
@@ -140,20 +141,24 @@ async function main() {
   );
 
   console.log("\nBuilding chronic-disease/behavioral-health series...");
-  let chronic = { diabetes: null, obesity: null, opioidOverdose: null } as Record<string, unknown>;
+  let chronic = { diabetes: null, obesity: null, opioidOverdose: null, firearmMortality: null } as Record<string, unknown>;
   try {
-    const [diabetes, obesity, opioidOverdose] = await Promise.all([
+    const [diabetes, obesity, opioidOverdose, firearmMortality] = await Promise.all([
       buildDiabetesSeries(),
       buildObesitySeries(),
       buildOpioidOverdoseSeries(),
+      buildFirearmMortalitySeries(),
     ]);
-    chronic = { diabetes, obesity, opioidOverdose };
+    chronic = { diabetes, obesity, opioidOverdose, firearmMortality };
     console.log(
       `  Diabetes: ${diabetes.states.length} states, as of ${diabetes.asOf}`
     );
     console.log(`  Obesity: ${obesity.states.length} states, as of ${obesity.asOf}`);
     console.log(
       `  Opioid overdose: ${opioidOverdose.states.length} states, as of ${opioidOverdose.asOf}`
+    );
+    console.log(
+      `  Firearm mortality: ${firearmMortality.states.length} states, as of ${firearmMortality.asOf}`
     );
   } catch (err) {
     console.warn(
