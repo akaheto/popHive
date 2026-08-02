@@ -37,26 +37,17 @@ export default function Home() {
   return (
     <div className="min-h-full" style={{ background: "var(--color-bg-page)" }}>
       <main className="mx-auto max-w-6xl px-6 py-8">
-        <header className="mb-6 pb-4" style={{ borderBottom: "1px solid var(--color-border-default)" }}>
-          <div className="flex flex-col gap-3">
-            <div>
-              <h1 className="text-2xl font-semibold" style={{ color: "var(--color-text-primary)" }}>
-                Public Health Surveillance Dashboard
-              </h1>
-              <p className="mt-1 text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                Current US disease activity, sourced from PopHIVE (Yale School of Public
-                Health). Personal reference — not a clinical or outbreak-classification tool.
-              </p>
-            </div>
-            <div style={{ color: "var(--color-text-secondary)" }}>
-              <p className="text-xs font-medium">
-                Latest data: <span style={{ color: "var(--color-text-primary)" }}>{latestDataDate}</span>
-              </p>
-              <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                Page generated {generatedDate} · Rebuilds daily at noon UTC
-              </p>
-            </div>
-          </div>
+        <header className="mb-4 pb-3" style={{ borderBottom: "1px solid var(--color-border-default)" }}>
+          <h1 className="text-lg font-semibold truncate" style={{ color: "var(--color-text-primary)" }}>
+            Public Health Surv...
+          </h1>
+          <p className="mt-1 hidden text-sm sm:block" style={{ color: "var(--color-text-secondary)" }}>
+            Current US disease activity, sourced from PopHIVE (Yale School of Public
+            Health). Personal reference — not a clinical or outbreak-classification tool.
+          </p>
+          <p className="text-xs font-medium" style={{ color: "var(--color-text-secondary)" }}>
+            Last updated: <span style={{ color: "var(--color-text-primary)" }}>{latestDataDate}</span>
+          </p>
         </header>
         <Dashboard
           overview={overview}
