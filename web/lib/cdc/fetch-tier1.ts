@@ -22,20 +22,20 @@ export async function fetchAllTier1Datasets(
 
   // Known large datasets that need pagination
   const largeDatasets = ["syndromic-surveillance-conditions"];
-  // Skip NNDSS due to Node.js string size limits - will be optimized in Phase 8
+  // Skip NNDSS - needs streaming parser or API endpoint redesign (not just selective fields)
   const skipDatasets = ["nndss-weekly"];
   const pageSize = 10000;
 
   for (const [key, config] of Object.entries(TIER1_DATASETS)) {
-    // Skip datasets with known issues
+    // Skip datasets with fundamental issues
     if (skipDatasets.includes(key)) {
-      console.log(`Skipping ${config.name} (${config.id}) - payload size issue, planned fix in Phase 8`);
+      console.log(`Skipping ${config.name} (${config.id}) - requires streaming parser or API redesign`);
       results.push({
         datasetKey: key,
         datasetId: config.id,
         success: false,
         rowCount: 0,
-        error: "Deferred - Node.js string size limits. Optimization planned.",
+        error: "Deferred to Phase 8B - needs streaming JSON parser due to large row sizes",
         fetchedAt: new Date().toISOString(),
       });
       continue;
@@ -54,14 +54,14 @@ export async function fetchAllTier1Datasets(
         let offset = 0;
         let hasMore = true;
         let pageCount = 0;
-        // NNDSS now uses selective fields, so can handle more pages
-        const maxPages = key === "nndss-weekly" ? 25 : 10; // 250k rows for NNDSS, 100k for others
+        const maxPages = 10; // Cap at 100k rows
 
         while (hasMore && pageCount < maxPages) {
           try {
             const response = await querySODARecent(config.id, config.dateField, effectiveDaysBack, {
               limit: pageSize,
               offset,
+              select: config.selectFields, // Use selective fields if available
             });
 
             allData = allData.concat(response.data);
@@ -79,6 +79,7 @@ export async function fetchAllTier1Datasets(
         // Standard fetch for smaller datasets
         const response = await querySODARecent(config.id, config.dateField, effectiveDaysBack, {
           limit: 1000,
+          select: config.selectFields, // Use selective fields if available
         });
         allData = response.data;
       }
