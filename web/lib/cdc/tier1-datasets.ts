@@ -11,6 +11,7 @@ export interface DatasetConfig {
   valueFields: string[]; // Fields to extract as values
   updateFrequency: "daily" | "weekly" | "monthly" | "annual";
   typicalLag: string;
+  selectFields?: string; // Selective field fetching (optional, for large datasets)
 }
 
 export const TIER1_DATASETS: Record<string, DatasetConfig> = {
@@ -61,6 +62,7 @@ export const TIER1_DATASETS: Record<string, DatasetConfig> = {
     valueFields: ["label", "week", "m2"],
     updateFrequency: "weekly",
     typicalLag: "1 week",
+    selectFields: "states,year,week,label,m2", // Selective fields to reduce payload
   },
 
   "covid-test-positivity": {
@@ -174,6 +176,12 @@ export const TIER1_DATASETS: Record<string, DatasetConfig> = {
     updateFrequency: "weekly",
     typicalLag: "2-3 days",
   },
+
+  // Vaccination Coverage (to be integrated in dedicated Phase 8 task)
+  // Datasets found but need field verification
+  // "vaccination-covid": ID n8mc-b4w4 (needs verification)
+  // "vaccination-influenza": ID q3kq-4t6c (needs verification)
+  // "vaccination-rsv": ID p6d6-8wa3 (needs verification)
 };
 
 // Helper to get datasets by category
