@@ -1,9 +1,9 @@
 # Status and Accountability
 
-- Overall status: `COMPLETE` (v1 feature build + 5 post-launch enhancements)
+- Overall status: `COMPLETE` (v1 feature build + 8 post-launch enhancements)
 - Owner: Ben Aheto
 - Last updated: 2026-08-02
-- Current gate: Gate 5 — Close (v1 M1-M8 complete; post-M8 enhancements E-004/E-006/E-007/E-009/E-012 delivered)
+- Current gate: Gate 5 — Close (v1 M1-M8 complete; post-M8 enhancements E-002/E-004/E-005/E-006/E-007/E-009/E-012/E-013 delivered)
 
 ## Progress
 
@@ -11,11 +11,14 @@
 - Completed 2026-07-26: M7 visual/accessibility pass. Delivered E-008 (theme-aware dark-mode choropleth ramp) and E-010 (keyboard-accessible "Jump to state" equivalent). Verified WCAG AA contrast, no horizontal overflow at narrowest reachable viewport (606px), visible keyboard focus states throughout. Found pre-existing gap E-013 (control heights 30-34px vs. 44px target) — deferred to future enhancement. Two manual checks remained pending: (1) dark-mode rendering under real `prefers-color-scheme: dark`; (2) true phone-width and 200% zoom.
 - Completed 2026-08-02: M8 close-out. Formal AC verification (10/10 ACs `PASS`); QA sign-off; retrospective complete. Manual verification on actual iPhone 14 Pro confirmed responsive design and theme rendering.
 - Completed 2026-08-02: Post-v1 enhancements delivered:
+  - **E-002** — Per-disease signal customization (localStorage-backed defaults with star icon)
   - **E-004** — Historical trend charts in overview cards (2-year line chart with peak reference)
+  - **E-005** — Level change alerts (notification banner when disease severity changes)
   - **E-006** — 10 disease signals (syndromic/medical/behavioral grouped selector)
   - **E-007** — Lazy-load county JSON via `/api/counties` (saves ~1.2MB from initial bundle)
   - **E-009** — County-level measles drill-down (320 counties from measles_county.parquet; enabled tri-state view for measles)
   - **E-012** — Vaccination panel with 6 vaccine types (MMR, DTaP, Polio, Hep B, Varicella, Combined 7)
+  - **E-013** — WCAG AA touch-target sizing (44x44px minimum for all interactive controls)
 - Deployment live at https://public-health-dashboard-lt5tiroht-ben-a.vercel.app; daily scheduled rebuild active (Vercel Cron, 0 12 * * *). CDC Dashboard integrated as main tab alongside Outbreak Tracker and Chronic Disease tabs (deployment in progress).
 
 ## Current milestone
