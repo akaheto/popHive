@@ -1,9 +1,9 @@
 # Status and Accountability
 
-- Overall status: `COMPLETE` (v1 feature build + 4 post-launch enhancements)
+- Overall status: `COMPLETE` (v1 feature build + 5 post-launch enhancements)
 - Owner: Ben Aheto
 - Last updated: 2026-08-02
-- Current gate: Gate 5 — Close (v1 M1-M8 complete; post-M8 enhancements E-004/E-006/E-007/E-012 delivered)
+- Current gate: Gate 5 — Close (v1 M1-M8 complete; post-M8 enhancements E-004/E-006/E-007/E-009/E-012 delivered)
 
 ## Progress
 
@@ -14,6 +14,7 @@
   - **E-004** — Historical trend charts in overview cards (2-year line chart with peak reference)
   - **E-006** — 10 disease signals (syndromic/medical/behavioral grouped selector)
   - **E-007** — Lazy-load county JSON via `/api/counties` (saves ~1.2MB from initial bundle)
+  - **E-009** — County-level measles drill-down (320 counties from measles_county.parquet; enabled tri-state view for measles)
   - **E-012** — Vaccination panel with 6 vaccine types (MMR, DTaP, Polio, Hep B, Varicella, Combined 7)
 - Deployment live at https://public-health-dashboard-lt5tiroht-ben-a.vercel.app; daily scheduled rebuild active (Vercel Cron, 0 12 * * *). CDC Dashboard integrated as main tab alongside Outbreak Tracker and Chronic Disease tabs (deployment in progress).
 
