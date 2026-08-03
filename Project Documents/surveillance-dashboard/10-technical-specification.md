@@ -126,11 +126,11 @@ changes (see the Word-export note in this document's governance, if applicable).
 | Choropleth map | Render state/county choropleth, tooltip, drill-down, tri-state highlight | `components/Choropleth.tsx` (d3-geo + us-atlas TopoJSON) | JSON series data | Rendered SVG map | Claude Code |
 | Overview strip | Level/trend/% of 2-year peak per disease (measles: case counts, no level); includes trend charts (E-004) | `components/OverviewStrip.tsx`, `components/TrendChart.tsx` | `overview.json` with `historicalPoints` | Rendered cards with charts | Claude Code |
 | Trend chart | 2-year line chart showing disease progression with peak reference (E-004) | `components/TrendChart.tsx` (Recharts) | `historicalPoints` array from OverviewCard | Rendered line chart | Claude Code |
-| Dashboard (outbreak tracker) | Disease/signal selectors (E-006: 10 signals), drill-down state, tri-state toggle, vaccination panel (E-012: 6 vaccine types) | `components/Dashboard.tsx` | `states.json`, `counties.json`, `vaccination.json` | Rendered UI | Claude Code |
+| Dashboard (outbreak tracker) | Disease/signal selectors (E-006: 10 signals), per-disease signal defaults (E-002, localStorage), level-change alerts (E-005), drill-down state, tri-state toggle, vaccination panel (E-012: 6 vaccine types), touch-target sizing (E-013: 44px WCAG AA) | `components/Dashboard.tsx` | `states.json`, `counties.json`, `vaccination.json`, `overview.json` | Rendered UI with interactive state | Claude Code |
 | CDC Dashboard tabs | Data Explorer, State Assessment, Disease Progression for CDC health data analysis | `components/CDCDataExplorer.tsx`, `StateAssessment.tsx`, `DiseaseProgression.tsx` | CDC API responses | Rendered analysis UI | Claude Code |
 | Chronic-disease panel | Separate tab, own indicator selector | `components/ChronicDiseasePanel.tsx` | `chronic.json` | Rendered UI | Claude Code |
 | NYC borough blend | Fetch + parse NYC DOHMH CSVs, merge into county data with fallback | `lib/nycDohmh.ts` | NYC DOHMH CSV URLs | `BoroughDatum[]` per disease | Claude Code |
-| County data API (E-007) | Lazy-load filtered county data by state FIPS | `/app/api/counties/route.ts` | State FIPS query parameter | County data for selected state (JSON) | Claude Code |
+| County data API (E-007, E-009) | Lazy-load filtered county data by state FIPS; supports flu, COVID, RSV, measles (E-009: 320 counties from measles_county.parquet) | `/app/api/counties/route.ts` | State FIPS query parameter | County data for selected state including measles (JSON) | Claude Code |
 | Scheduled rebuild | Trigger periodic redeploys | Vercel Cron + deploy hook | Schedule config | Redeploy trigger | Implemented (M7) |
 
 ## Folder structure
@@ -304,6 +304,28 @@ Never record actual secret values.
 - Accessibility requirements: Standard practice per the visual style guide (contrast,
   keyboard nav, focus visibility) — see `12-visual-style-guide.md`. Map state-click
   drill-down has a keyboard equivalent as of M7 (E-010): a "Jump to state" `<select>`.
+
+## Client-side enhancements (post-M8)
+
+### Per-disease signal defaults (E-002)
+- localStorage key: `disease_signal_defaults` (JSON object mapping disease → Signal)
+- Helpers: `getDefaultSignal(disease)` and `saveSignalDefault(disease, signal)` in Dashboard.tsx
+- UI: Star icon (☆/★) next to signal selector; click to save current selection as default
+- Behavior: When switching diseases, Dashboard loads the saved default (or "CDC NSSP" if none)
+- Persistence: Cleared only if user manually clears browser localStorage
+
+### Level change alerts (E-005)
+- localStorage key: `disease_levels` (JSON object mapping disease → level string)
+- Tracks changes in `overview.flu.level`, `overview.covid.level`, `overview.rsv.level`
+- On change: notification banner appears (Outbreak Tracker tab only, for clarity)
+- Display: Shows up to 3 most recent level changes with disease name and old→new transition
+- Persistence: Cleared on browser refresh (stateless per page load)
+
+### WCAG AA touch-target sizing (E-013)
+- All interactive controls (`<button>`, `<select>`) now have `minHeight: 44px` with flexbox alignment
+- Applied to: disease selector buttons, signal dropdowns, toggles, vaccine type buttons, CDC subtabs
+- Implementation: `touchTargetStyle` constant exported from Dashboard.tsx
+- No layout changes needed; flexbox centers content vertically within the 44px target
 
 ## Technical limitations and debt
 
