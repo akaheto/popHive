@@ -21,7 +21,7 @@ export async function fetchAllTier1Datasets(
   const data: Record<string, unknown[]> = {};
 
   // Known large datasets that need pagination
-  const largeDatasets = ["nndss-weekly"];
+  const largeDatasets = ["nndss-weekly", "syndromic-surveillance-conditions"];
   const pageSize = 10000;
 
   for (const [key, config] of Object.entries(TIER1_DATASETS)) {

@@ -63,6 +63,30 @@ export const TIER1_DATASETS: Record<string, DatasetConfig> = {
     typicalLag: "1 week",
   },
 
+  "covid-test-positivity": {
+    id: "seuz-s2cv",
+    name: "COVID-19 Test Positivity Data",
+    category: "infectious-disease",
+    description: "Weekly COVID-19 test positivity rates by state",
+    dateField: "date",
+    stateField: "state",
+    valueFields: ["test_positivity_percent", "percent_positive"],
+    updateFrequency: "weekly",
+    typicalLag: "1-2 weeks",
+  },
+
+  "syndromic-surveillance-conditions": {
+    id: "v58w-vynu",
+    name: "Healthcare Syndromic Surveillance - Conditions",
+    category: "infectious-disease",
+    description: "ED visit percentages by condition (respiratory, GI, other) and age group (daily)",
+    dateField: "date",
+    stateField: "geography",
+    valueFields: ["condition", "age_group", "percent_visits"],
+    updateFrequency: "daily",
+    typicalLag: "1-2 days",
+  },
+
   // Chronic Disease
   "chronic-disease-indicators": {
     id: "hksd-2xuw",
