@@ -64,5 +64,5 @@ vercel --prod          # Deploy to production
 
 ## Help & Support
 
-Click the **?** icon in the dashboard header for the user guide, or browse documentation in the `Project Documents/surveillance-dashboard/` folder.
+Click the **?** icon in the dashboard header to open the user guide. Documentation is also maintained in the `Project Documents/surveillance-dashboard/` folder.
 

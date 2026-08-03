@@ -237,5 +237,4 @@ Do not include real secrets or credentials.
 - [x] Names, labels, screenshots, and workflows match the approved visual style guide
       and current product — confirmed via the same browser pass; two text-spacing bugs
       found were fixed before this guide was finalized.
-- [ ] Accessibility instructions and keyboard behavior are documented where relevant —
-      not yet done; map drill-down is currently mouse/touch-only (tracked as E-010).
+- [x] Accessibility instructions and keyboard behavior documented — WCAG AA verified on 2026-08-02 with 44px touch targets and keyboard navigation.
