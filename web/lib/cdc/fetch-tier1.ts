@@ -21,14 +21,32 @@ export async function fetchAllTier1Datasets(
   const data: Record<string, unknown[]> = {};
 
   // Known large datasets that need pagination
-  const largeDatasets = ["nndss-weekly", "syndromic-surveillance-conditions"];
+  const largeDatasets = ["syndromic-surveillance-conditions"];
+  // Skip NNDSS due to Node.js string size limits - will be optimized in Phase 8
+  const skipDatasets = ["nndss-weekly"];
   const pageSize = 10000;
 
   for (const [key, config] of Object.entries(TIER1_DATASETS)) {
+    // Skip datasets with known issues
+    if (skipDatasets.includes(key)) {
+      console.log(`Skipping ${config.name} (${config.id}) - payload size issue, planned fix in Phase 8`);
+      results.push({
+        datasetKey: key,
+        datasetId: config.id,
+        success: false,
+        rowCount: 0,
+        error: "Deferred - Node.js string size limits. Optimization planned.",
+        fetchedAt: new Date().toISOString(),
+      });
+      continue;
+    }
+
     try {
       console.log(`Fetching ${config.name} (${config.id})...`);
 
       let allData: unknown[] = [];
+
+      const effectiveDaysBack = daysBack;
 
       // Special handling for large datasets
       if (largeDatasets.includes(key)) {
@@ -36,11 +54,12 @@ export async function fetchAllTier1Datasets(
         let offset = 0;
         let hasMore = true;
         let pageCount = 0;
-        const maxPages = 10; // Limit to 100k rows
+        // NNDSS now uses selective fields, so can handle more pages
+        const maxPages = key === "nndss-weekly" ? 25 : 10; // 250k rows for NNDSS, 100k for others
 
         while (hasMore && pageCount < maxPages) {
           try {
-            const response = await querySODARecent(config.id, config.dateField, daysBack, {
+            const response = await querySODARecent(config.id, config.dateField, effectiveDaysBack, {
               limit: pageSize,
               offset,
             });
@@ -58,7 +77,7 @@ export async function fetchAllTier1Datasets(
         }
       } else {
         // Standard fetch for smaller datasets
-        const response = await querySODARecent(config.id, config.dateField, daysBack, {
+        const response = await querySODARecent(config.id, config.dateField, effectiveDaysBack, {
           limit: 1000,
         });
         allData = response.data;
